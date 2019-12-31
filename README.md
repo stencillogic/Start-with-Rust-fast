@@ -805,13 +805,6 @@ fn main() {
 }
 ```
 
-`as` keyword can be used to alias imported name, e.g.:
-
-``` rust
-use std::fmt::Result;
-use std::io::Result as IoResult;
-```
-
 At the same time child modules can access parent module without restriction.
 `super` keyword can be used to access elements from parent module, e.g.:
 
@@ -823,6 +816,51 @@ mod submod {
         super::func();
     }
 }
+```
+
+`as` keyword can be used to alias imported name, e.g.:
+
+``` rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+```
+
+`pub use` combination can be used to reexport name imported in current scope to external consumers, e.g.:
+
+``` rust
+pub use crate::submod::subsubmod;
+```
+
+Nesting and globs:
+
+```rust
+use std::io;
+use std::cmp::Ordering;
+```
+
+is equvalent of:
+
+```rust
+use std::{cmp::Ordering, io};
+```
+
+And:
+
+``` rust
+use std::io;
+use std::io::Write;
+```
+
+is equvalent of:
+
+``` rust
+use std::io::{self, Write};
+```
+
+Glob operator:
+
+``` rust
+use std::collections::*;
 ```
 
 If we use `pub` for a whole structure the structure becomes visible, but it's fields are not visible. To make a struct field visible `pub` must be applied to that field. E.g.:
@@ -864,5 +902,248 @@ fn main() {
 }
 ```
 
+Subdirectories and files can be used to organize modules, .e.g:
 
-to be continued...
+``` rust
+mod submod {
+    pub mod subsubmod {
+        pub fn subfunc() {
+        }
+    }
+
+    pub fn func() {
+    }
+}
+
+use submod::subsubmod;
+
+fn main() {
+    subsubmod::subfunc();
+}
+```
+
+can be transformed into:
+
+src
+  |_main.rs
+  |_submod.rs
+  |_submod
+    |_subsubmod.rs
+
+where main.rs contains:
+
+``` rust
+mod submod;
+
+use submod::subsubmod;
+
+pub fn main() {
+    subsubmod::subfunc();
+}
+```
+
+submod.rs contains:
+
+``` rust
+pub mod subsubmod;
+
+pub fn func() {
+    println!("Func is called");
+}
+```
+
+subsubmod.rs contains:
+
+``` rust
+pub fn subfunc() {
+    println!("Subfun called");
+}
+```
+
+## Basic collections
+
+Collections store data on heap and thus resizable.
+
+Vector.
+
+Vector is resizable array of elements of certain type.
+
+Usage examples:
+
+``` rust
+// create vector
+let v: Vec<i32> = Vec::new();
+
+// create vector using macro, datatype is iferred from the data
+let mut v = vec![1, 2, 3];
+
+// add an element
+v.push(4);
+
+// modify element
+v[0] = -1;
+
+// modify element by it's reference
+let mut el_ref: &mut i32 = &mut v[2];
+*el_ref -= 2;
+
+// read an element, if index is out of bound program panics
+let el: i32 = v[2];
+
+// read using option
+match v.get(2) {
+    Some(el) => { println!("{}", el); }
+    None => ()
+}
+
+// iteration
+for i in &v {
+    println!("{}", i);
+}
+
+// iteration with update
+for i in &mut v {
+    *i += 50;
+}
+
+```
+To store elements of different type or structure enum or trait can be used.
+
+
+String.
+
+String allows store and manipulate on text strings. `String` datatype stores utf-8 encoded strings. For other encodings other datatypes exist.
+
+Usage example
+
+``` rust
+// initialization
+let mut s = String::new();
+let mut s = "some string".to_string();
+let mut s = String::from("some string");
+
+// append string
+s.push_str(" append");
+
+// append char
+s.push('a');
+
+// adding strings
+let s1 = String::from("first");
+let s2 = String::from(" second");
+let s3 = s1 + &s2 + "abc";        // s1 is movd to s3 and is not usable after this line
+
+// deref coercion
+let s = "string".to_string();
+let r: &str = &s;                 // &String is assigned to &str
+
+// format! macro
+let formatted: String = format!("{} {}", s2, s3);
+
+// indexing, can take only rage longer than 1 byte
+// operates on bytes, not characters
+let ss = "testing";
+let s = &ss[0..4];
+
+// iteration on utf-8 code points
+for c in "testing".chars() {
+    println!("{}", c);
+}
+
+// iteration on bytes
+for c in "testing".bytes() {
+    println!("{}", c);
+}
+```
+
+HashMap.
+
+HashMap is associative array backed by hash table.
+
+Usage example:
+
+``` rust
+use std::collections::HashMap;
+
+let mut hm = HashMap::new();
+
+// keys and values have fixed datatypes
+// datatypes here are inferred automatically from the data
+hm.insert(String::from("Blue"), 10);
+hm.insert(String::from("Yellow"), 50);
+
+// check if entry with a key exists and add if not
+hm.entry(String::from("Yellow")).or_insert(50);
+
+// get value
+let val = hm.get("Yellow");
+
+// iterate
+for (key, value) in &hm {
+    println!("{}: {}", key, value);
+}
+
+// overwrite entry with a new value
+hm.insert(String::from("Yellow"), 100);
+
+// update value
+let entry = hm.entry(String::from("Yellow")).or_insert(0);
+*entry += 10;
+
+```
+
+## Error handling
+
+Macro `panic!` can be used to abort program with error.
+
+``` rust
+fn main() {
+    panic!("crash!");
+}
+```
+
+Command `RUST_BACKTRACE=1 cargo run` can be used for debug version of app to show stack backtrace on panic event.
+
+For recoverable error enum `Result` is used:
+
+``` rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+Instance of Result has several useful methods:
+
+``` rust
+use std::fs::File;
+
+// return value of Ok in case of Ok, and panic in case of Err with custom message
+let f1 = File::open("log.txt").expect("Error message");
+
+// return value of Ok in case of Ok, and panic in case of Err
+let f2 = File::open("log.txt").unwrap();
+
+// open file or return stdout on error
+let f3 = File::open("log.txt").unwrap_or_else(|_| -> File {f2});
+```
+
+Error propagation.
+
+`?` operator can be used inside function returning `Result` type.
+The `?` placed after a `Result` value will interrupt execution in case of Err and function will return Err result. If the `Result` value is Ok `?` returns unwrapped value of Ok and processing continues.
+
+Retrun type for of the function can differ from Err type passed to `?` operator. 
+Error values that have the ? operator called on them go through the `from` function, defined in the `From` trait in the standard library, which is used to convert errors from one type into another.
+
+Example:
+
+``` rust
+use std::io::Error;
+use std::fs::File;
+
+fn test() -> Result<File, Error> {
+  let f = File::open("file.txt")?;       // generates std::io::Error on error
+  Ok(f)
+}
+```
