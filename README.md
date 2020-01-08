@@ -1147,3 +1147,457 @@ fn test() -> Result<File, Error> {
   Ok(f)
 }
 ```
+
+
+## Generic data types, traits, and lifetimes
+
+### Generic types
+
+Generic data types can be used in functions, structures, and enumerations.
+Basic usage examples:
+
+``` rust
+// generic datatype in a function
+fn my_fun<T>(arg: T) -> T {
+    println!("Sample fun called");
+    arg
+}
+
+
+// generic datatype in sctructure
+struct MyStruct<T> {
+    f: T,
+}
+
+// generalized implementation
+impl<T> MyStruct<T> {
+    fn test(&mut self, v: T) -> &T {
+        println!("General implementation");
+        self.f = v;
+        &self.f
+    }
+}
+
+
+// implementation for an exact type
+impl MyStruct<f32> {
+    fn test_f32(&mut self, v: f32) -> &f32 {
+        println!("Method specific to f32 type");
+        self.f = v;
+        &self.f
+    }
+}
+
+fn main() {
+
+    // implicit type inference
+    my_fun(1);
+
+    // explicit type specification
+    my_fun::<f32>(1.0);
+
+
+    // structure instantiation and method calls
+    let mut x = MyStruct { f: 0 };
+
+    x.test(10);
+
+    let mut y: MyStruct<f32> = MyStruct { f: 0.0 };
+
+    y.test(1.0);
+    y.test_f32(2.0);
+}
+```
+
+Multiple generic types can be used:
+
+``` rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+Generic data types do not have influence on performance of resulting code.
+
+### Traits
+
+
+Trait defines specific behaviour of a type. Trait is similar to interface in Java.
+
+Trait can have methods without implementation or with default implementation. Not-implemented methods of a trait can be called inside other methods of the trait with default implementation.
+
+Coherence (or orphan rule): we can't implement trait defined in a different crate for data type defined in an another different create. We can implement a trait for a data type if one of them is local to our crate or both of them are inside our crate.
+
+Examples:
+
+``` rust
+// trait defenition
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+// a type
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+// implementation of the trait method
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+// another type
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+// another implementation
+impl Summary for Tweet {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+```
+
+Calling trait method example:
+
+``` rust
+let tweet = Tweet {
+    username: String::from("horse_ebooks"),
+    content: String::from("of course, as you probably already know, people"),
+    reply: false,
+    retweet: false,
+};
+
+println!("1 new tweet: {}", tweet.summarize());
+```
+
+Default implementation of trait method example:
+
+``` rust
+// a trait with default method implementation
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+// a type
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+// implementation of the trait with default implementation for the type
+impl Summary for NewsArticle {}
+```
+
+Calling not-implemented method inside other method of a trait example:
+
+``` rust
+pub trait Summary {
+    fn summarize_author(&self) -> String;
+
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+```
+### Trait bound
+
+Generic type can be bound to certain traits. In that case generic type must implement those traits.
+
+Examples:
+
+``` rust
+// full syntax
+pub fn notify<T: Summary>(item: T) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+// simplified syntax
+impl Summary for Tweet {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+}
+
+// multiple trait syntax
+pub fn notify(item: impl Summary + Display) {
+    ...
+}
+
+pub fn notify<T: Summary + Display>(item: T) {
+    ...
+}
+
+// trait bound with where keyword makes code more readable
+fn some_function<T, U>(t: T, u: U) -> i32
+    where T: Display + Clone,
+          U: Clone + Debug
+{
+    ...
+}
+
+// return type that implement traits
+fn returns_summarizable() -> impl Summary {
+    ...
+}
+
+// conditional method implementation:
+// the following method of MyStruct is implemented only for types that 
+// implement both Display and PartialOrd traits
+impl<T: Display + PartialOrd> MyStruct<T> {
+    fn my_method(&self) {
+        ...
+    }
+}
+```
+
+Blanket implementation is an implementation for generic type.
+
+Example:
+
+``` rust
+trait MyTrait {
+    fn get_info(&self) -> String {
+        "some info".to_string()
+    }
+}
+
+trait InfoPrinter {
+    fn print_info(&self);
+}
+
+// blanket implementation of InfoPrinter for any type that implements MyTrait
+impl<T: MyTrait> InfoPrinter for T {
+    fn print_info(&self) {
+        println!("{}", self.get_info());
+    }
+}
+
+struct MyStruct {}
+
+impl MyTrait for MyStruct {}
+
+fn main() {
+
+    let s = MyStruct {};
+
+    // we have not specified explicitly that we implement InfoPrinter 
+    // yet we can call it's method because there is blanket implementation
+    s.print_info();
+}
+```
+
+### Lifetimes
+
+Lifetime is a characteristic of a reference. Lifetime defines scope of function arguments which are of reference type and return value if it is of reference time. Sometimes compiler can infer lifetime automatically, but in other situations compiler might not know what is assumed lifetime of references coming an going out of a function.
+
+Syntax:
+
+``` rust
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime
+```
+
+Example:
+
+``` rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+fn main() {
+    let string1 = String::from("long string is long");
+
+    {
+        let string2 = String::from("xyz");
+
+        // result can be a reference to string1 or string2 
+        // which one is not known at compile time
+        // for that explicit lifetime in function definition is used to explicitly
+        // tell compiler that lifetime for both arguments and return value is the same
+        let result = longest(string1.as_str(), string2.as_str());
+        println!("The longest string is {}", result);
+    }
+}
+```
+
+We can't specify reference as a data type of struct field unless we use lifetime.
+Example:
+
+``` rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.')
+        .next()
+        .expect("Could not find a '.'");
+
+    // first_sentence exists before ImportantExcerpt instance is initialized 
+    // and does not go out of scope before ImportantExcerpt instance
+    let i = ImportantExcerpt { part: first_sentence };
+}
+```
+
+When explicit annotations are omitted the compiler uses three rules to figure out what lifetimes references have when there aren’t explicit annotations.
+Lifetime elision rules:
+
+1. Each parameter that is a reference gets its own lifetime parameter. In other words, a function with one parameter gets one lifetime parameter: `fn foo<'a>(x: &'a i32);` a function with two parameters gets two separate lifetime parameters: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);` and so on.
+
+2. If there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters: `fn foo<'a>(x: &'a i32) -> &'a i32`.
+
+3. If there are multiple input lifetime parameters, but one of them is `&self` or `&mut self` because this is a method, the lifetime of self is assigned to all output lifetime parameters.
+
+The rules help to make code more concise.
+Examples:
+
+``` rust
+fn first_word(s: &str) -> &str {
+```
+
+will become:
+
+```rust
+fn first_word<'a>(s: &'a str) -> &'a str {
+```
+
+``` rust
+fn longest(x: &str, y: &str) -> &str {
+```
+
+will become
+
+``` rust
+fn longest<'a, 'b>(x: &'a str, y: &'b str) -> &str {
+```
+
+For method:
+
+``` rust
+impl<'a> ImportantExcerpt<'a> {
+    // first lifetime elision rule gives both &self and announcement 
+    // their own lifetimes. Then, because one of the parameters is &self,
+    // the return type gets the lifetime of &self
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+```
+
+`'static` is a special lifetime which means that this reference can live for the entire duration of the program. All string literals have the `'static` lifetime.
+
+
+## Testing
+
+Rust provides means for unit-testing and integration testing.
+
+Unit tests usually created in the same file with tested functionality. E.g.
+
+``` rust
+fn some_func(arg: i32) -> i32 {
+    println!("Hello");
+    arg
+}
+
+// unit tests reside inside module with annotation "cfg"
+#[cfg(test)]
+mod tests {
+    // bring some_func into scope of this test module
+    use super::*;
+
+    // not test function
+    fn some_setup() {
+        println!("I do nothing");
+    }
+
+    // some test func
+    #[test]
+    fn test1() {
+        let v = some_func(2);
+        assert!(v*v == v*v, "For some reason {} x {} not equal {}", v, v, v*v);
+        assert_eq!(v, v, "additional message goes here");
+        assert_ne!(v, v+1, "additional message goes here");
+    }
+
+    // some test func which sould panic with certain message, then test succeeds.
+    // Value of expected argument in should_panic annotation treated as substring 
+    // of panic message thrown by the test
+    #[test]
+    #[should_panic(expected="Out of memory")]
+    fn test2() {
+        panic!("We have problem: Out of memory!");
+    }
+
+    // test can return Result<(), String> instead of panicing
+    #[test]
+    fn test3() -> Result<(), String> {
+        if 2 + 2 == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+    
+    // this test with ignore annotation will be skipped
+    #[test]
+    #[ignore]
+    fn ignored_test() {
+        panic!("I was not ignored!");
+    }
+}
+```
+
+Assertion macros should be used in unit-tests. Available macros include:
+
+ - `assert!`: accepts boolean argument of type bool. Test fails if argument is false.
+ - `assert_eq!`: accepts two arguments and uses == operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
+ - `assert_ne!`: accepts two arguments and uses != operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
+
+Running all tests:
+
+> cargo test
+
+Running specific tests:
+
+> cargo test test1
+
+Cargo searches for substring in test name and if it matches test is executed, i.e. if `cargo test test1` will also run `test12`, `test1_3`, etc.
+
+By default tests run in parallel in several threads. It can lead to contention on some shared resources, e.g. files. The number of threads is configurable as well:
+
+> cargo test -- --test-threads=1
+
+By default stdout of successful tests is suppressed. To print stdout of successful tests use:
+
+> cargo test -- --nocapture
+
+Run tests with `ignore` annotation:
+
+> cargo test -- --ignored
+
+
+Integration tests should be placed in separated directory named `tests` in the root of your project. Each file in tests directory is a separate crate representing integration test. Functiona which are common to all integration tests can be put in `tests/<some_dir>/mod.rs`. `tests/<some_dir>/mod.rs` will not be interpreted as integration test in that case.
+
+In case of binary package it is not possible to perform integration tests agains it. It is common practice to make library package and pull almost everything insode library. Along with it create a binary package with small amout of unctionlality which uses the library.
