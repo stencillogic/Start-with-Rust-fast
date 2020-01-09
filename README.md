@@ -1,4 +1,4 @@
-# Learn Rust fast
+# Learn Rust fast (Work in progress)
 
 This is a shorter version of the official Rust tutorial (The Rust Programming Language book).
 Enjoy.
