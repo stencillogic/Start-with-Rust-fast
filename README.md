@@ -1,4 +1,4 @@
-# Learn Rust fast (Work in progress)
+# Learn Rust fast (work in progress)
 
 This is a shorter version of the official Rust tutorial (The Rust Programming Language book).
 Enjoy.
@@ -51,6 +51,17 @@ edition = "2018"
 ...
 ```
 
+Optionally it can contain profile sections. By default there is dev and release profiles. They can be overwritten or new profiles can be added, e.g.:
+
+```
+...
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
+...
+``` 
 
 To build the project cd to <project_name> directory and call:
 
@@ -65,10 +76,15 @@ Also you can call:
 > cargo run                 # build and run the resulting application
 > cargo check               # quick build without making output
 > cargo build --release     # build the release version of app and put it in `target/release` dir
+> cargo doc --open          # generate html documentation from code
 
 ## Language concepts
 
 Strict type system.
+Not interpretable.
+Language has functional and OOP features.
+Concepts which are specific to this language is ownership, borrowing, and lifetimes. 
+OOP features are limited compared to Java and C++.
 
 ## Basic control structures
 
@@ -1147,6 +1163,7 @@ fn test() -> Result<File, Error> {
   Ok(f)
 }
 ```
+`eprintln!` macro can be sued to print to stderr in runtime.
 
 
 ## Generic data types, traits, and lifetimes
@@ -1601,3 +1618,689 @@ Run tests with `ignore` annotation:
 Integration tests should be placed in separated directory named `tests` in the root of your project. Each file in tests directory is a separate crate representing integration test. Functiona which are common to all integration tests can be put in `tests/<some_dir>/mod.rs`. `tests/<some_dir>/mod.rs` will not be interpreted as integration test in that case.
 
 In case of binary package it is not possible to perform integration tests agains it. It is common practice to make library package and pull almost everything insode library. Along with it create a binary package with small amout of unctionlality which uses the library.
+
+
+## Closures, iterators, and functional features
+
+Closure syntax:
+
+"|" [ <param_name> [ ":" <data_type> ] ] { "," <param_name> [ ":" <data_type> ] } "|" [ "->" <data_type> ] <expression>
+
+Examples:
+
+``` rust
+// standard function
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+
+// closures
+// each of add_one_v variables below has unique anonymous type
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
+Closure is analogous to function, but data type specification is not mandatory becuase compiler can always infer data type.
+Data type can be inferred just once.
+
+``` rust
+let example_closure = |x| x;
+
+let s = example_closure(String::from("hello"));    // after this line example_closure can accept only string arguments
+```
+
+Closures can capture environment, e.g.:
+
+``` rust
+fn main() {
+    let x = 4;
+
+    let add_to_x = |z| z + x;
+
+    let y = 2;
+
+    assert_eq!(add_to_x(y), 6);
+}
+```
+
+Closures (and functions) implement traits `FnOnce`, `FnMut`, and `Fn`:
+
+ - `FnOnce` consumes the variables it captures from its enclosing scope, known as the closure’s environment. To consume the captured variables, the closure must take ownership of these variables and move them into the closure when it is defined. The Once part of the name represents the fact that the closure can’t take ownership of the same variables more than once, so it can be called only once.
+ - `FnMut` can change the environment because it mutably borrows values.
+ - `Fn` borrows values from the environment immutably.
+
+Example:
+
+``` rust
+// struct has field which has type implementing Fn trait
+struct MyStruct<T>
+    where T: Fn(i32) -> i32
+{
+    closure_field: T
+}
+
+let my_closure = |x| x;
+
+let s = MyStruct { closure_field: my_closure, };
+
+println!("{}", (s.closure_field)(0));
+```
+
+`move` keyword can be used to forcibly move captured environment to closure, e.g.:
+
+``` rust
+let x = vec![1, 2, 3];
+let equal_to_x = move |z| z == x;    // x is moved out of scope and can't be used after this line
+```
+
+`move` can be used to pass closure with captured environment to a different thread.
+
+### Iterators
+
+Iterator allows to perform tasks on sequences of items.
+
+Examples:
+
+``` rust
+// define vector of integers
+let v1 = vec![1, 2, 3];
+
+// get mutable iterator over elements
+let mut v1_iter = v1.iter();
+
+// use next method to fetch next item
+// method next returns immutable reference to a value
+assert_eq!(v1_iter.next(), Some(&1));
+assert_eq!(v1_iter.next(), Some(&2));
+assert_eq!(v1_iter.next(), Some(&3));
+assert_eq!(v1_iter.next(), None);
+
+// to iterate over items once more new iterator is required
+// getting new immutable iterator
+let v1_iter = v1.iter();
+
+// use iterator in for loop
+// for loop converts iterator to mutable imlicitly
+for val in v1_iter {
+    println!("Got: {}", val);
+}
+```
+
+Any iterator implements trait `Iterator` with definition:
+
+``` rust
+pub trait Iterator {
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+
+    // methods with default implementations elided
+    // the trait also provides default implementations for those methods
+    // methods include: 
+    //   collect - make a collection, 
+    //   sum - calculate sum of all items, 
+    //   map - perform calculation on every item
+    //   filter - filter out some items
+    //   etc.
+}
+```
+
+Example of using `Iterator` trait:
+
+``` rust
+// struct for counting 
+struct Counter {
+    count: u32,
+}
+
+impl Counter {
+    fn new() -> Counter {
+        Counter { count: 0 }
+    }
+}
+
+// iterator implementation
+impl Iterator for Counter {
+    type Item = u32;
+
+    // give out integers from 1 and up to 5
+    fn next(&mut self) -> Option<Self::Item> {
+        self.count += 1;
+
+        if self.count < 6 {
+            Some(self.count)
+        } else {
+            None
+        }
+    }
+}
+
+// usage example
+fn main() {
+    let d = 3;
+    let sum: u32 = Counter::new().zip(Counter::new().skip(1))
+                                 .map(|(a, b)| a * b)          // map uses closure
+                                 .filter(|x| x % d == 0)       // d is captured from outer scope
+                                 .sum();
+    assert_eq!(18, sum);
+}
+```
+
+Use of iterators does not introduce additional performance penalty compared to loops.
+
+## Project documentation
+
+`///` is used to put documentation on functions.
+`//!` is used to put documentation on crate or module as a whole.
+
+`///` is interpreted as markdown and can contain sections:
+
+ - Examples: usage examples. `cargo test` runs not only nit and integration tests but also code from examples.
+ - Panics: The scenarios in which the function being documented could panic.
+ - Errors: If the function returns a Result, describes the kinds of errors that might occur and what conditions might cause those errors.
+ - Safety: If the function is unsafe to call there should be a section explaining why the function is unsafe and covering the invariants that the function expects callers to uphold.
+
+Examples:
+
+``` rust
+/// Adds one to the number given.
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -> i32 {
+    x + 1
+}
+```
+
+``` rust
+//! # My Crate
+//!
+//! `my_crate` is a collection of utilities to make performing certain
+//! calculations more convenient.
+```
+
+## Workspaces
+
+Project can be organized as workspace. E.g.:
+
+```
+<workspace_dir>
+├── Cargo.lock
+├── Cargo.toml
+├── add-one
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── adder
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── target
+```
+
+Workspace has Cargo.lock and Cargo.toml in the root of the workspace folder. THe files are common to all creates inside the workspace.
+Workspace also has single target directory.
+
+`<workspace_dir>/Cargo.toml` has contents:
+
+```
+[workspace]
+
+members = [
+    "adder",
+    "add-one",
+]
+```
+
+Cargo.toml in subdirectories has contents typical to any package.
+
+## Smart pointers
+
+Smart pointers allow to allocate data on heap, count references, free up memory automatically, and other things.
+Basic smart pointers:
+
+ - `Box<T>` for allocating values on the heap.
+ - `Rc<T>`, a reference counting type that enables multiple ownership.
+ - `Ref<T>` and `RefMut<T>`, accessed through `RefCell<T>`, a type that enforces the borrowing rules at runtime instead of compile time.
+
+They have the following properties and use-cases:
+
+ - `Rc<T>` enables multiple owners of the same data; `Box<T>` and `RefCell<T>` have single owners.
+ - `Box<T>` allows immutable or mutable borrows checked at compile time; `Rc<T>` allows only immutable borrows checked at compile time; `RefCell<T>` allows immutable or mutable borrows checked at runtime.
+ - Because `RefCell<T> `allows mutable borrows checked at runtime, you can mutate the value inside the `RefCell<T>` even when the `RefCell<T>` is immutable.
+
+### Box
+
+Boxes are used in the following situations:
+ - When you have a type whose size can’t be known at compile time and you want to use a value of that type in a context that requires an exact size
+ - When you have a large amount of data and you want to transfer ownership but ensure the data won’t be copied when you do so
+ - When you want to own a value and you care only that it’s a type that implements a particular trait rather than being of a specific type
+
+Smart pointers implement the `Deref` and `Drop` traits. `Deref` trait allows to convert smart pointer to regular reference. `Drop` trait defines destructor for a type. When value of the type goes out of scope destructor for that value is called.
+
+Examples:
+
+```rust
+// recursive data structure
+#[derive(Debug)]
+enum List {
+    Cons(i32, Box<List>),           // can't reference List directly becuase size 
+                                    // of the structure is not known at compile time
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1,
+        Box::new(Cons(2,
+            Box::new(Cons(3,
+                Box::new(Nil))))));
+
+    println!("{:?}", list);
+}
+```
+
+### Deref trait
+
+`Box` implements `Deref` whic allows to do the following:
+
+``` rust
+fn main() {
+    let x = 5;
+    let y = Box::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+`Deref` is also implemented for `Vec` and `String`.
+`Deref` can be implemented for cusom type, e.g.:
+
+``` rust
+use std::ops::Deref;
+
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);  // *y is identical to *(y.deref())
+}
+```
+
+Deref coercion is automatic conversion from reference to type implemeting `Deref` to reference type returned by `deref()` method of the trait.
+Example:
+
+``` rust
+fn hello(name: &str) {
+    println!("Hello, {}!", name);
+}
+
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&m);   // &m is identical to &(*(m.deref())).deref()
+}
+```
+
+The `DerefMut` trait can be used to override the * operator on mutable references.
+Rust does deref coercion when it finds types and trait implementations in three cases:
+
+ - From `&T` to `&U` when `T: Deref<Target=U>`
+ - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
+ - From `&mut T` to `&U` when `T: Deref<Target=U>`
+
+In the third case Rust will coerce a mutable reference to an immutable one. But the reverse is not possible becuase there can be several users of immutable reference and just one user of mutable one.
+
+### Drop trait
+
+Example:
+
+``` rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer { data: String::from("my stuff") };
+    let d = CustomSmartPointer { data: String::from("other stuff") };
+    println!("CustomSmartPointers created.");
+}    // drop is automatically called on the end of scope
+```
+
+Dropping explicitly:
+
+```rust
+...
+
+fn main() {
+    let c = CustomSmartPointer { data: String::from("some data") };
+    println!("CustomSmartPointer created.");
+
+    // explicit drop of c. Note, c.drop() can't be used.
+    drop(c);
+
+    println!("CustomSmartPointer dropped before the end of main.");
+}
+```
+
+### Reference counting with Rc<T>
+
+The `Rc<T>` type keeps track of the number of references to a value which determines whether or not a value is still in use. 
+Example:
+
+```rust
+enum List {
+    Cons(i32, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));  // num of users: 1
+    let b = Cons(3, Rc::clone(&a));                             // num of users: 2
+    let c = Cons(4, Rc::clone(&a));                             // num of users: 3
+}
+// b, c, and a are out of scope and use counter becomes 0
+// and Rc drops owned data
+```
+
+`Rc::clone` doesn’t make a deep copy of all the data. It just copies smart pointer instance in increments use counter. Data is dropped when use counter becomes 0.
+
+### Interior mutability with RefCell<T>
+
+Interior mutability is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data.
+
+`RefCell<T>` implements borrowing rules at runtime:
+
+ - At any given time, you can have either (but not both of) one mutable reference or any number of immutable references.
+ - References must always be valid.
+
+If rules are broken at runtime program will panic and exit.
+
+Example:
+
+``` rust
+use std::cell::RefCell;
+
+struct MyStruct {
+    f1: RefCell<String>,
+    f2: String
+}
+
+fn main() {
+    let a = MyStruct { 
+      f1: RefCell::new("can mutate".to_string()), 
+      f2: "can't mutate".to_string() 
+    };
+
+    // a is immutable, but f1 can be changed; a.f2 can't be changed
+    *a.f1.borrow_mut() = "mutated".to_string();
+
+    println!("{}; {}", a.f1.borrow(), a.f2);
+}
+```
+
+Use case for `RefCell<T>` is for example mocking objects in tests.
+`RefCell<T>` keeps track of borrows. E.g. you can't borrow twice with `borrow_mut()`, or call `borrow_mut()` when values is already borrowed for read with `borrow()`.
+
+Type `Rc<RefCell<T>>` allows to have several holders of data that can mutate.
+Example:
+
+``` rust
+#[derive(Debug)]
+enum List {
+    Cons(Rc<RefCell<i32>>, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+use std::cell::RefCell;
+
+fn main() {
+    let value = Rc::new(RefCell::new(5));
+
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+
+    let b = Cons(Rc::new(RefCell::new(6)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(10)), Rc::clone(&a));
+
+    *value.borrow_mut() += 10;
+
+    // several items refer to data that was mutated at runtime
+    println!("a after = {:?}", a);
+    println!("b after = {:?}", b);
+    println!("c after = {:?}", c);
+}
+```
+
+### Avoiding reference cycles with Weak references
+
+If we have two values referencing each other with use of `Rc<T>` then when the values go out of scope both `Rc<T>` will still have value of 1 which will lead to a memory leak.
+
+E.g. consider tree where parent reference children and children reference parent:
+
+``` rust
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        parent: RefCell::new(Weak::new()),   // empty reference for now
+        children: RefCell::new(vec![]),
+    });
+
+    // weak reference points to None
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+
+    let branch = Rc::new(Node {
+        value: 5,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![Rc::clone(&leaf)]),   // referencing leaf
+    });
+
+    // referencing parent of leaf
+    *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+    // weak reference points to "branch"
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+}
+```
+
+`Rc::downgrade` returns a weak pointer increasing weak reference counter, and does not increase strong reference counter compared to `RC::clone`. `upgrade()` method on the Weak pointer instance returns Option: either referenced value still exists or already doesn't.
+
+## Concurrency (parallelism)
+
+Rust's standard library provides means for managing threads, message passing between threads and shared state primitives.
+
+Threads example:
+
+``` rust
+use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+
+    // creating thread
+    // thread::spawn expects closure
+    // this closure captures reference to vector
+    // and thus requires explicit move keyword
+    let handle = thread::spawn(move || {
+        println!("Here's a vector: {:?}", v);
+    });
+    // v is not accessible here
+
+    // the main thread awaits for thread termination
+    // and unwraps Result returned by join()
+    handle.join().unwrap();
+}
+```
+
+Message passing with channels example:
+
+``` rust
+use std::thread;
+use std::sync::mpsc;       // using multiple producer, single consumer channel
+
+fn main() {
+    // creating channel: tx is transmitter, rx is receiver
+    let (tx, rx) = mpsc::channel();
+
+    // create thread and move tx there
+    thread::spawn(move || {
+        let val = String::from("hi");
+
+        // sned the message
+        tx.send(val).unwrap();
+
+        // val here can't be used anymore as it was moved
+    });
+
+    // receive the message using blocking method recv and print it
+    let received = rx.recv().unwrap();
+    println!("Got: {}", received);
+}
+```
+
+Using second sender and iterator to read messages:
+
+``` rust
+use std::thread;
+use std::sync::mpsc;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    // creating second sender
+    let tx2 = mpsc::Sender::clone(&tx);
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+    });
+
+    thread::spawn(move || {
+        let val = String::from("hey");
+        tx2.send(val).unwrap();
+    });
+
+    // receiving messages by using iterator
+    for received in rx {
+        println!("Got: {}", received);
+    }
+}
+```
+
+Sharing state with `Mutex<T>`:
+
+``` rust
+use std::sync::Mutex;
+
+fn main() {
+    // create mutex with integer value
+    let m = Mutex::new(5);
+
+    {
+        // acquire lock and get value reference
+        let mut num = m.lock().unwrap();
+
+        // mutate value
+        *num = 6;
+    }
+    // after going out of scope mutex is automatically unlocked
+
+    println!("m = {:?}", m);
+}
+```
+
+Method `lock` returns a smart pointer called `MutexGuard`, wrapped in a `LockResult`. 
+`MutexGuard` implements `Deref` and `Drop`, and when it goes out of scope `drop()` is called and mutex is unlocked.
+
+Mutex can be shared between threads with help of `Arc<T>`. `Arc<T>` is similar to `Rc<T>`, but `Rc<T>` can't be used by mutiple threads, so atomic `Rc<T>` is required. `Arc<T>` is slower than `Rc<T>` because of costs of syncronization.
+
+Example:
+
+```rust
+use std::sync::{Mutex, Arc};
+use std::thread;
+
+fn main() {
+    // new mutex wrapped in Arc
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        // increase reference count of the mutex
+        let counter = Arc::clone(&counter);
+
+        // create thread and move Arc instance there
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        });
+
+        // save thread handle
+        handles.push(handle);
+    }
+
+    // wait for the threads to finish
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}
+```
+
+It is not possible to move an `Rc<T>` or `RefCell<T>` instance in a thread because anything that can be moved in a thread must implement `Send` and `Sync` traits.
+The `Send` marker trait indicates that ownership of the type implementing `Send` can be transferred between threads.
+
+Almost every Rust type is `Send`. Any type composed entirely of `Send` types is automatically marked as `Send` as well. Almost all primitive types are `Send`, aside from raw pointers.
+ 
+The `Sync` marker trait indicates that it is safe for the type implementing `Sync` to be referenced from multiple threads. In other words, any type `T` is `Sync` if `&T` is `Send`, meaning the reference can be sent safely to another thread. E.g. `Mutex<T>` is a smart pointer and it is `Sync`.
+
+Manually implementing these traits involves implementing unsafe Rust code.
+
+
+
+
