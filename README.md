@@ -1,6 +1,6 @@
 # Learn Rust fast
 
-This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.org/book/title-page.html) (The Rust Programming Language book). It may come in handy if you feel confident and want to start using Rust quickly, or if you want to refresh  knwoledge on some rarely used feature.
+This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.org/book/title-page.html) (The Rust Programming Language book). It may come in handy if you want to start with Rust quickly.
 
 ## Table of contents.
 
@@ -50,7 +50,6 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
   * [Advanced types](#advanced-types)
   * [Advanced functions and closures](#advanced-functions-and-closures)
   * [Macros](#macros)
-
 
 ## Installation, update, and uninstallation
 
@@ -118,7 +117,7 @@ To build the project cd to <project_name> directory and call:
 
 Note, linker is not included as part of Rust. External linker is used to build output.
 The command creates `target/debug` directory where output (it can be executable or library) is saved.
-The build command also creates Cargo.lock which containes exact version of dependencies used to build the project. Cargo needs to lock versions because versions of dependencies in Cargo.toml are not exact but rather specify expected "compatibility version" while Cargo.lock specifies exact version.
+The build command also creates `Cargo.lock` which containes exact version of dependencies used to build the project. Cargo needs to lock versions because versions of dependencies in `Cargo.toml` are not exact but rather specify expected "compatibility version" while `Cargo.lock` specifies exact version.
 
 Also you can call:
 
@@ -126,6 +125,7 @@ Also you can call:
 > cargo check               # quick build without making output
 > cargo build --release     # build the release version of app and put it in `target/release` dir
 > cargo doc --open          # generate html documentation from code
+> cargo fmt                 # format code in your project 
 
 ## Basic control structures
 
@@ -133,14 +133,14 @@ Also you can call:
 
 In general:
 
-``` rust
-"fn" <function_name> ([<arg1_name>: <datatype>, <arg2_name>: <datatype>, ...]) {
+``` 
+"fn" <function_name> "(" [ <arg1_name>: <datatype>, <arg2_name>: <datatype>, ... ] ")" "{"
     <body>
-}
+"}"
 ```
 
 Function body consists of statements and expressions. Statement ends with ";".
-Function can return value as expression without ";".
+Function can return value as expression without ";" at the end.
 
 Examples:
 
@@ -154,16 +154,16 @@ fn some_func1() {
 // function with arguments and without return value
 fn some_func2(x: u32, y: i8) {
     println!("x = {}, y = {}", x, y);   // print x and y
-    return;            // return from function without return value
+    return;                             // return from function without return value
 }
 
 // function with arguments and return value
 fn some_func3(x: u32, y: u32) -> u32 {	// return value datatype
-    x + y     // return value as expression
+    x + y                              // return value as expression
 }
 
 fn some_func3(x: u32, y: u32) -> u32 {
-    return x + y;     // return statement with return keyword
+    return x + y;                      // return statement with return keyword
 }
 
 ```
@@ -180,18 +180,16 @@ fn fun_outer() {
     let x = {        // assigning an expression calculated inside "{" and "}"
         let a = 1;
         x + a        // expression return value
-    }; // end of statement
+    };               // end of statement
 }
 ```
-
-
 
 ### Varibale declaration
 
 In general:
 
-``` rust
-"let" ["mut"] <var_name>[ ":" <datatype>] [ "=" <expression>] ";"
+```
+"let" [ "mut" ] <var_name> [ ":" <datatype> ] [ "=" <expression> ] ";"
 ```
 
 Examples:
@@ -212,14 +210,14 @@ Constants.
 
 In general:
 
-``` rust
-"const" <upper_case_name>: <datatype> = <value>;
+```
+"const" <upper_case_name> ":" <datatype> "=" <value> ";"
 ```
 
 Example:
 
 ``` rust
-const V:u32 = 100_000;	// 100_000 is 100000
+const V: u32 = 100_000;	// 100_000 is 100000
 ```
 
 
@@ -252,7 +250,7 @@ arch - depending on architecture can be 32 bit or 64 bit.
 
 Integer types allow overflow in release build, but program will panic at overflow in debug build.
 
-f32, f64 - floating poit numbers of 32- and 64-bit length.
+f32, f64 - floating poit numbers of 32- and 64-bit length correspondingly.
 
 Number literals:
 
@@ -264,6 +262,16 @@ Number literals:
 | Binary | 0b1111_0000 | 
 | Byte (u8 only) | b'A' |
 | Floating point | 0.2 |
+
+Datatype can be added at the end of numeric literal, e.g.:
+
+```rust
+// 127 as u8
+let a = 127u8;
+
+// -1.5e+3 as f32
+let b = -1.5e+3f32;
+```
 
 bool - boolean datatype. Boolean literals are "true" and "false".
 
@@ -308,6 +316,17 @@ let el1 = x.1;
 
 // expanding tuple x to variables
 let (u, i, c) = x;
+```
+
+Datatype casting can be performed using `as` keyword:
+
+```rust
+let a = 12345u32;
+
+let b = (a as f32) / 2.7;
+
+// accessing fields
+println!("{} {}", a, b);
 ```
 
 ## Control flow
@@ -419,7 +438,7 @@ Ownership doesn't apply to simple datatypes, e.g.:
 let x = 5;
 let y = x;
 
-// x stays in scope and accessible
+// x stays in scope and is accessible
 println!("{}", x);
 ```
 
@@ -429,7 +448,7 @@ In contrast:
 let s1 = String::from("hello");
 let s2 = s1;
 
-// s1 is not availalbe anymore becuase String is not basic datatype.
+// s1 is not availalbe anymore becuase String is not basic datatype
 ```
 
 In case you need both you can clone the object:
@@ -454,8 +473,8 @@ some_function(s1);
 
 let x = 5;
 
-// calling othe function and passing x as argument
-other_function(s1);
+// calling other function and passing x as argument
+other_function(x);
 
 // x is still available
 println!("{}", x);
@@ -483,7 +502,6 @@ The Rules of References:
 Example:
 
 ``` rust
-
 // two readers
 let x: u32 = 5;
 let r1: &u32 = &x;
@@ -491,7 +509,7 @@ let r2 = &x;
 
 // mutable reference and it's use
 let mut y: f32 = 0.3;
-let r3: &mut f32 = &mut y;  // no more references are allowed after this
+let r3: &mut f32 = &mut y;  // no more references of y are allowed after this
  
 *r3 += 1.0;          // using reference to change the value of variable "y"
 
@@ -513,11 +531,11 @@ fn main() {
 }
 
 fn calculate_length(s: &String) -> usize {   // function accepts reference to a String
-    s.len()
+    s.len()                                  // s.len() is identical to (*s).len() here
 }
 ```
 
-It is important to understand difference between data on stack and in heap. E.g.:
+It is important to understand difference between data on stack and on the heap. E.g.:
 
 ``` rust
 fn ret_some_ref() -> &String {
@@ -535,8 +553,8 @@ Example :
 ``` rust
 let s = String::from("hello world");
 
-let hello: &str = &s[0..5];   // slice 1
-let world = &s[6..11];  // slice 2
+let hello: &str = &s[0..5];       // slice 1
+let world = &s[6..11];            // slice 2
 
 let slice_from_start = &s[..5];   // slice from the beginning and up to 5
 let slice_till_end = &s[5..];     // slice from 5 and up to the end
@@ -594,7 +612,6 @@ let mut cnt = user.sign_in_count;
 cnt += 1;
 user.sign_in_count = cnt;
 
-
 // shorthand initialization using variables with identical names
 let username = "Kris".to_string();
 let email = "-".to_string();
@@ -616,7 +633,7 @@ let user2 = User {
 struct SomeUnitStruct;
 ```
 
-Single members cannot be mutable, only whole struct can be mutable.
+Single struct members cannot be mutable, only whole struct can be mutable.
 
 ### Named tuples
 
@@ -628,8 +645,10 @@ struct MyData1(u32, char, bool);
 struct MyData2(u32, char, bool);  // MyData2 is different data type than MyData1
 
 let data1 = MyData1(1, 'A', true);
-```
 
+// accessing fields
+println!("f0: {},  f1: {}, f2: {}", data1.0, data1.1, data1.2);
+```
 
 ### Structure methods
 
@@ -678,9 +697,10 @@ fn main() {
 
 We can create several `impl` blocks and put them in separate files.
 
+
 ## Enumerations and pattern matching
 
-Enum has a set of predefined values. Each value can have associated value, structure or tuple.
+Enum has a set of predefined values. Each value can have associated value, structure, or tuple.
 
 Example:
 
@@ -707,7 +727,7 @@ let change_color_msg = Message::ChangeColor(255,0,255);
 
 Predefined Option enum.
 
-Option enum is used to replace null value. Definition:
+`Option` enum is used to replace null value in Rust. Definition:
 
 ``` rust
 enum Option<T> {
@@ -716,7 +736,7 @@ enum Option<T> {
 }
 ```
 
-Option also has a set of methods to extract value from Some and do other stuff.
+Option also has a set of methods for extracting value from `Some` and do other stuff.
 
 ### pattern matching
 
@@ -734,14 +754,14 @@ enum Coin {
 
 fn value_in_cents(coin: Coin) -> u8 {
     match coin {
+        // match arms
         Coin::Penny => 1,
         Coin::Nickel => 5,
         Coin::Dime => 10,
         Coin::Quarter => 25,
-        _ => 0                // default arm with placeholder
+        _ => 0                // default arm with placeholder "_"
     }
 }
-
 
 // matching with variable and exact value
 fn plus_one(x: Option<i32>) -> Option<i32> {
@@ -757,7 +777,7 @@ fn plus_one(x: Option<i32>) -> Option<i32> {
 }
 ```
 
-`match` returns value of one of matched arms.
+`match` evaluates expression and returns value of just one matched arm.
 
 `if let` operator is a form of pattern matching expression. Example:
 
@@ -767,7 +787,7 @@ if let Some(i) = some_u8_value {
     println!("{}", i); 
 }
 
-// else is analog of _ placeholder
+// else is analog of "_" placeholder
 let mut count = 0;
 if let Coin::Quarter(state) = coin {
     println!("State quarter from {:?}!", state);
@@ -780,27 +800,26 @@ if let Coin::Quarter(state) = coin {
 
 Packages.
 
-Packages is a Cargo feature that lets you build, test, and share crates. 
+Packages is a Cargo feature that lets you build, test, and share _crates_. 
 Package is a set of crates united by common functionality. 
 
 Crates.
 
-Crate is a tree of modules that produces a library or an executable. 
+Crate is a tree of _modules_ that produces a _library_ or an _executable_. 
 There can be several binaries in a crate but just one library, or a library and several binaries.
 
 Modules.
 
-Modules let you control the organization, scope, and privacy of paths.
+Modules let you control the organization, scope, and privacy of paths in the module tree.
 
 Paths. 
 
-Paths is a way of naming an item, such as a struct, function, or module
-
+Paths is a way of naming an item, such as a struct, function, or module, e.g.: `std:io:Error`
 
 Command `cargo new` create a package. 
 Cargo uses filenames to distinguish binary and library crate. `main.rs` is a sign of binary crate, `lib.rs` is a sign of library.
 
-Mopdules let you organize code, e.g.:
+Modules let you organize code, e.g.:
 
 ``` rust
 mod submod {
@@ -835,14 +854,14 @@ fn main() {
     submod::func();
 
     // this is an absolute path
-    cargo::submod::func();
+    crate::submod::func();
 }
 ```
 
 `submod` is accessible without `pub` becuase it is on the same level as function `main`.
 `subsubmod` and `subfunc` are not accessible from `main`.
 
-`use` keyword brings symbols from submodules to current scope, e.g.:
+`use` keyword brings symbols from submodules to the current scope, e.g.:
 
 ``` rust
 mod submod {
@@ -863,7 +882,7 @@ fn main() {
 ```
 
 At the same time child modules can access parent module without restriction.
-`super` keyword can be used to access elements from parent module, e.g.:
+`super` keyword can be used to access elements from the parent module, e.g.:
 
 ``` rust
 fn func() {}
@@ -914,13 +933,13 @@ is equvalent of:
 use std::io::{self, Write};
 ```
 
-Glob operator:
+Also glob operator can be used:
 
 ``` rust
 use std::collections::*;
 ```
 
-If we use `pub` for a whole structure the structure becomes visible, but it's fields are not visible. To make a struct field visible `pub` must be applied to that field. E.g.:
+If we use `pub` for a whole structure the structure becomes visible, but it's fields are not visible. To make a struct field visible `pub` must be applied to the field. E.g.:
 
 ``` rust
 mod submod {
@@ -956,6 +975,7 @@ mod submod {
 }
 
 fn main() {
+    ...
 }
 ```
 
@@ -965,10 +985,12 @@ Subdirectories and files can be used to organize modules, .e.g:
 mod submod {
     pub mod subsubmod {
         pub fn subfunc() {
+            println!("Subfun called");
         }
     }
 
     pub fn func() {
+        println!("Func is called");
     }
 }
 
@@ -1019,11 +1041,11 @@ pub fn subfunc() {
 
 ## Basic collections
 
-Collections store data on heap and thus resizable.
+Collections store data on the heap and thus resizable.
 
 Vector.
 
-Vector is resizable array of elements of certain type.
+Vector is a resizable array of elements of certain type.
 
 Usage examples:
 
@@ -1044,7 +1066,7 @@ v[0] = -1;
 let mut el_ref: &mut i32 = &mut v[2];
 *el_ref -= 2;
 
-// read an element, if index is out of bound program panics
+// read an element; if index is out of bound program panics
 let el: i32 = v[2];
 
 // read using option
@@ -1064,14 +1086,14 @@ for i in &mut v {
 }
 
 ```
-To store elements of different type or structure enum or trait can be used.
+To store elements of different types or structure `enum` or `trait` can be used.
 
 
 String.
 
-String allows store and manipulate on text strings. `String` datatype stores utf-8 encoded strings. For other encodings other datatypes exist.
+String allows to store and manipulate text strings. `String` datatype stores utf-8 encoded strings. For other encodings other datatypes exist.
 
-Usage example
+Usage example:
 
 ``` rust
 // initialization
@@ -1079,7 +1101,7 @@ let mut s = String::new();
 let mut s = "some string".to_string();
 let mut s = String::from("some string");
 
-// append string
+// append slice
 s.push_str(" append");
 
 // append char
@@ -1088,7 +1110,7 @@ s.push('a');
 // adding strings
 let s1 = String::from("first");
 let s2 = String::from(" second");
-let s3 = s1 + &s2 + "abc";        // s1 is movd to s3 and is not usable after this line
+let s3 = s1 + &s2 + "abc";        // s1 is moved to s3 and is not usable after this line
 
 // deref coercion
 let s = "string".to_string();
@@ -1097,7 +1119,7 @@ let r: &str = &s;                 // &String is assigned to &str
 // format! macro
 let formatted: String = format!("{} {}", s2, s3);
 
-// indexing, can take only rage longer than 1 byte
+// indexing; can take only rage longer than 1 byte
 // operates on bytes, not characters
 let ss = "testing";
 let s = &ss[0..4];
@@ -1115,7 +1137,7 @@ for c in "testing".bytes() {
 
 HashMap.
 
-HashMap is associative array backed by hash table.
+HashMap is an associative array backed by hash table.
 
 Usage example:
 
@@ -1129,10 +1151,10 @@ let mut hm = HashMap::new();
 hm.insert(String::from("Blue"), 10);
 hm.insert(String::from("Yellow"), 50);
 
-// check if entry with a key exists and add if not
+// check if entry with a key exists and add if doesn't
 hm.entry(String::from("Yellow")).or_insert(50);
 
-// get value
+// get value be a key
 let val = hm.get("Yellow");
 
 // iterate
@@ -1146,7 +1168,6 @@ hm.insert(String::from("Yellow"), 100);
 // update value
 let entry = hm.entry(String::from("Yellow")).or_insert(0);
 *entry += 10;
-
 ```
 
 ## Error handling
@@ -1161,7 +1182,7 @@ fn main() {
 
 Command `RUST_BACKTRACE=1 cargo run` can be used for debug version of app to show stack backtrace on panic event.
 
-For recoverable error enum `Result` is used:
+For generating recoverable error enum `Result` is used:
 
 ``` rust
 enum Result<T, E> {
@@ -1170,7 +1191,7 @@ enum Result<T, E> {
 }
 ```
 
-Instance of Result has several useful methods:
+Instance of `Result` has several useful methods:
 
 ``` rust
 use std::fs::File;
@@ -1181,7 +1202,7 @@ let f1 = File::open("log.txt").expect("Error message");
 // return value of Ok in case of Ok, and panic in case of Err
 let f2 = File::open("log.txt").unwrap();
 
-// open file or return stdout on error
+// open file or return different value on error
 let f3 = File::open("log.txt").unwrap_or_else(|_| -> File {f2});
 ```
 
@@ -1190,8 +1211,8 @@ Error propagation.
 `?` operator can be used inside function returning `Result` type.
 The `?` placed after a `Result` value will interrupt execution in case of Err and function will return Err result. If the `Result` value is Ok `?` returns unwrapped value of Ok and processing continues.
 
-Retrun type for of the function can differ from Err type passed to `?` operator. 
-Error values that have the ? operator called on them go through the `from` function, defined in the `From` trait in the standard library, which is used to convert errors from one type into another.
+Retrun type of the function can differ from Err type passed to `?` operator. 
+Error values that have the `?` operator called on them go through the `from` function defined in the `From` trait in the standard library, which is used to convert errors from one type into another.
 
 Example:
 
@@ -1199,11 +1220,12 @@ Example:
 use std::io::Error;
 use std::fs::File;
 
-fn test() -> Result<File, Error> {
+fn test() -> Result<File, std::Error> {
   let f = File::open("file.txt")?;       // generates std::io::Error on error
   Ok(f)
 }
 ```
+
 `eprintln!` macro can be sued to print to stderr in runtime.
 
 
