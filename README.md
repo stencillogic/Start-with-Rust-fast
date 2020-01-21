@@ -6,7 +6,6 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
 
 - [Installation, update, and uninstallation](#installation-update-and-uninstallation)
 - [Creating and building a project](#creating-and-building-a-project)
-- [Language concepts](#language-concepts)
 - [Basic control structures](#basic-control-structures)
   * [Function definition](#function-definition)
   * [Varibale declaration](#varibale-declaration)
@@ -127,14 +126,6 @@ Also you can call:
 > cargo check               # quick build without making output
 > cargo build --release     # build the release version of app and put it in `target/release` dir
 > cargo doc --open          # generate html documentation from code
-
-## Language concepts
-
-Strict type system.
-Not interpretable.
-Language has functional and OOP features.
-Concepts which are specific to this language is ownership, borrowing, and lifetimes. 
-OOP features are limited compared to Java and C++.
 
 ## Basic control structures
 
