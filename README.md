@@ -45,7 +45,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
 - [Obect-oriented features](#obect-oriented-features)
   * [Dynamic polimorphism](#dynamic-polimorphism)
 - [Patterns and matching](#patterns-and-matching)
-- [Advance Rust](#advance-rust)
+- [Advanced Rust](#advance-rust)
   * [Unsafe Rust](#unsafe-rust)
   * [Advanced traits](#advanced-traits)
   * [Advanced types](#advanced-types)
@@ -2756,7 +2756,7 @@ match msg {
 }
 ```
 
-## Advance Rust
+## Advanced Rust
 
 ### Unsafe Rust
 
