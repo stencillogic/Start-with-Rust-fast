@@ -1,7 +1,57 @@
-# Learn Rust fast (work in progress)
+# Learn Rust fast
 
-This is a shorter version of the official Rust tutorial (The Rust Programming Language book).
-Enjoy.
+This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.org/book/title-page.html) (The Rust Programming Language book). It may come in handy if you feel confident and want to start using Rust quickly, or if you want to refresh  knwoledge on some rarely used feature.
+
+## Table of contents.
+
+- [Installation, update, and uninstallation](#installation-update-and-uninstallation)
+- [Creating and building a project](#creating-and-building-a-project)
+- [Language concepts](#language-concepts)
+- [Basic control structures](#basic-control-structures)
+  * [Function definition](#function-definition)
+  * [Varibale declaration](#varibale-declaration)
+- [Control flow](#control-flow)
+  * [Conditional expressions](#conditional-expressions)
+  * [Loops](#loops)
+- [Ownership](#ownership)
+  * [References and borrowing](#references-and-borrowing)
+  * [Slices](#slices)
+- [Structures](#structures)
+  * [Named tuples](#named-tuples)
+  * [Structure methods](#structure-methods)
+- [Enumerations and pattern matching](#enumerations-and-pattern-matching)
+  * [pattern matching](#pattern-matching)
+- [Project organization](#project-organization)
+- [Basic collections](#basic-collections)
+- [Error handling](#error-handling)
+- [Generic data types, traits, and lifetimes](#generic-data-types-traits-and-lifetimes)
+  * [Generic types](#generic-types)
+  * [Traits](#traits)
+  * [Trait bound](#trait-bound)
+  * [Lifetimes](#lifetimes)
+- [Testing](#testing)
+- [Closures, iterators, and functional features](#closures-iterators-and-functional-features)
+  * [Iterators](#iterators)
+- [Project documentation](#project-documentation)
+- [Workspaces](#workspaces)
+- [Smart pointers](#smart-pointers)
+  * [Box](#box)
+  * [Deref trait](#deref-trait)
+  * [Drop trait](#drop-trait)
+  * [Reference counting with Rc<T>](#reference-counting-with-rc)
+  * [Interior mutability with RefCell<T>](#interior-mutability-with-refcell)
+  * [Avoiding reference cycles with Weak references](#avoiding-reference-cycles-with-weak-references)
+- [Concurrency (parallelism)](#concurrency-parallelism)
+- [Obect-oriented features](#obect-oriented-features)
+  * [Dynamic polimorphism](#dynamic-polimorphism)
+- [Patterns and matching](#patterns-and-matching)
+- [Advance Rust](#advance-rust)
+  * [Unsafe Rust](#unsafe-rust)
+  * [Advanced traits](#advanced-traits)
+  * [Advanced types](#advanced-types)
+  * [Advanced functions and closures](#advanced-functions-and-closures)
+  * [Macros](#macros)
+
 
 ## Installation, update, and uninstallation
 
@@ -88,7 +138,7 @@ OOP features are limited compared to Java and C++.
 
 ## Basic control structures
 
-### Function definition.
+### Function definition
 
 In general:
 
@@ -145,7 +195,7 @@ fn fun_outer() {
 
 
 
-### Varibale declaration.
+### Varibale declaration
 
 In general:
 
@@ -271,7 +321,7 @@ let (u, i, c) = x;
 
 ## Control flow
 
-### conditional expressions
+### Conditional expressions
 
 Examples:
 
@@ -577,7 +627,7 @@ struct SomeUnitStruct;
 
 Single members cannot be mutable, only whole struct can be mutable.
 
-### Named tuples.
+### Named tuples
 
 Example:
 
@@ -2150,7 +2200,7 @@ fn main() {
 
 ## Concurrency (parallelism)
 
-Rust's standard library provides means for managing threads, message passing between threads and shared state primitives.
+Rust's standard library provides means for managing threads, message passing between threads, and shared state primitives.
 
 Threads example:
 
@@ -2301,6 +2351,1073 @@ The `Sync` marker trait indicates that it is safe for the type implementing `Syn
 
 Manually implementing these traits involves implementing unsafe Rust code.
 
+## Obect-oriented features
+
+Incapsulation is provided by `pub` keyword on modules, structures, enumerations, structure fields, and functions.
+
+Compile time polymorphism is available with use of generic types. It is also called bounded parametric polymorphism. With bounds on generics the compiler generates nongeneric implementations of functions and methods for each concrete type that we use in place of a generic type parameter. This is static dispatch.
+
+Rust does not provide rich inheritance features. Traits are used to define common behaviour.
+
+### Dynamic polimorphism
+
+Dynamic polymorphism (dynamic dispatch) can be achieved by using trait objects. With dynamic dispatch, at runtime, Rust uses the pointers inside the trait object to know which method to call. There is a runtime cost when this lookup happens that doesn’t occur with static dispatch. Dynamic dispatch also prevents the compiler from choosing to inline a method’s code, which in turn prevents some optimizations. 
+
+A trait can be used to create trait objects if all the methods defined in the trait have the following properties:
+
+ - The return type isn’t `Self`.
+ - There are no generic type parameters.
+
+Trait object variable is a pointer (can be a smart pointer) followed by keyword `dyn` and trait type, e.g.:
+
+``` rust
+let trait_obj: &dyn MyTrait;
+let trait_obj: Box<dyn MyTrait>;
+```
+
+Usage example:
+
+```rust
+trait Test {
+    fn run_test(&self);
+}
+
+struct MyStruct1 {}
+struct MyStruct2 {}
+
+impl Test for MyStruct1 {
+    fn run_test(&self) {
+        println!("Callled on MyStruct 1");
+    }
+}
+
+impl Test for MyStruct2 {
+    fn run_test(&self) {
+        println!("Callled on MyStruct 2");
+    }
+}
+
+fn main() {
+    let obj1 = MyStruct1 {};
+    let obj2 = MyStruct2 {};
+
+    let mut trait_obj: &dyn Test = &obj1;
+
+    // prints "Callled on MyStruct 1"
+    trait_obj.run_test();
+
+    trait_obj = &obj2;
+
+    // prints "Callled on MyStruct 2"
+    trait_obj.run_test();
+}
+```
+
+## Patterns and matching
+
+Patterns are used in the following constructs:
+
+``` rust
+// matching a single value to an exhaustive set of patterns
+match <value> {
+    <pattern> => <expression>,
+    <pattern> => <expression>,
+    <pattern> => <expression>,
+}
+```
+
+``` rust
+// matching to sevaral patterns
+if let <pattern> = <expression> {         // if let
+} else if let <pattern> = <expression> {  // else if let
+} else if <condition> {                   // without pattern
+} else {
+}
+```
+
+``` rust
+// cycle while there is a match
+while let <pattern> = <expression> {
+}
+```
+
+``` rust
+// in for cycle
+for <pattern> in <iterator> {
+}
+```
+
+``` rust
+// creating variables
+let <pattern> = <expression>;
+```
+
+``` rust
+// in closure and function parameters
+fn function_name(<pattern>: <datatype>) {
+}
+```
+
+<pattern> consists of some combination of the following:
+
+ - Literals
+ - Destructured arrays, enums, structs, or tuples
+ - Variables
+ - Wildcards
+ - Placeholders
+
+Patterns come in two forms: refutable and irrefutable. Patterns that will match for any possible value passed are `irrefutable`. Patterns that can fail to match for some possible value are `refutable`.
+
+Function parameters, let statements, and for loops can only accept irrefutable patterns.
+
+Matching examples.
+
+Literals:
+
+``` rust
+let x = 1;
+
+match x {
+    1 => println!("one"),
+    2 => println!("two"),
+    3 => println!("three"),
+    _ => println!("anything"),
+}
+```
+
+Variables:
+
+``` rust
+let x = Some(5);
+let y = 10;
+
+match x {
+    Some(50) => println!("Got 50"),
+    Some(y) => println!("Matched, y = {:?}", y),  // previously defined y is shadowed
+                                                  // up to the end of expression
+                                                  // after the expression outer y
+                                                  // is available again
+    _ => println!("Default case, x = {:?}", x),
+}
+```
+
+Mutliple patterns:
+
+``` rust
+let x = 1;
+
+match x {
+    1 | 2 => println!("one or two"),  // patteras are "or"ed with |
+    3 => println!("three"),
+    _ => println!("anything"),
+}
+```
+
+Ranges of values:
+
+``` rust
+let x = 5;
+
+match x {
+    1..=5 => println!("one through five"),    // is equvalent to 1|2|3|4|5
+    _ => println!("something else"),
+}
+```
+
+Ranges are allowed only with numeric and char types. Example for chars:
+
+``` rust
+let x = 'c';
+
+match x {
+    'a'..='j' => println!("early ASCII letter"),
+    'k'..='z' => println!("late ASCII letter"),
+    _ => println!("something else"),
+}
+```
+
+Destructuring structs:
+
+``` rust
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let p = Point { x: 0, y: 7 };
+
+    // full syntax
+    let Point { x: a, y: b } = p;
+    assert_eq!(0, a);
+    assert_eq!(7, b);
+
+    // short syntax,
+    // variable names must match the filed names
+    let Point { x, y } = p;
+    assert_eq!(0, x);
+    assert_eq!(7, y);
+
+    // refutable patterns with literals
+    match p {
+        Point { x, y: 0 } => println!("On the x axis at {}", x),
+        Point { x: 0, y } => println!("On the y axis at {}", y),
+        Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+    }
+}
+```
+
+Destructuring Enums:
+
+``` rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {
+    let msg = Message::ChangeColor(0, 160, 255);
+
+    match msg {
+        Message::Quit => {
+            println!("The Quit variant has no data to destructure.")
+        },
+        Message::Move { x, y } => {
+            println!(
+                "Move in the x direction {} and in the y direction {}",
+                x,
+                y
+            );
+        }
+        Message::Write(text) => println!("Text message: {}", text),
+        Message::ChangeColor(r, g, b) => {
+            println!(
+                "Change the color to red {}, green {}, and blue {}",
+                r,
+                g,
+                b
+            )
+        }
+    }
+}
+```
+
+Destructuring Nested Structs and Enums:
+
+``` rust
+enum Color {
+   Rgb(i32, i32, i32),
+   Hsv(i32, i32, i32),
+}
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(Color),
+}
+
+fn main() {
+    let msg = Message::ChangeColor(Color::Hsv(0, 160, 255));
+
+    match msg {
+        Message::ChangeColor(Color::Rgb(r, g, b)) => {
+            println!(
+                "Change the color to red {}, green {}, and blue {}",
+                r,
+                g,
+                b
+            )
+        },
+        Message::ChangeColor(Color::Hsv(h, s, v)) => {
+            println!(
+                "Change the color to hue {}, saturation {}, and value {}",
+                h,
+                s,
+                v
+            )
+        }
+        _ => ()
+    }
+}
+```
+
+Destructuring Structs and Tuples:
+
+``` rust
+let ((feet, inches), Point {x, y}) = ((3, 10), Point { x: 3, y: -10 });
+```
+
+Ignoring value:
+
+``` rust
+fn foo(_: i32, y: i32) {
+    println!("This code only uses the y parameter: {}", y);
+}
 
 
+fn main() {
+    foo(3, 4);
+}
+```
 
+Ignore some parts of the value:
+
+``` rust
+let numbers = (2, 4, 8, 16, 32);
+
+match numbers {
+    (first, _, third, _, fifth) => {
+        println!("Some numbers: {}, {}, {}", first, third, fifth)
+    },
+}
+```
+
+Marking unused variable:
+
+``` rust
+// unuzed var is prefixed with _
+let _x = 5;
+
+// use in pattern
+let s = Some(String::from("Hello!"));
+if let Some(_s) = s {                  // note s is moved to _s 
+                                       // and is not accessible after this line
+    println!("found a string");
+}
+
+```
+
+Ignoreing parts with `..` :
+
+```rust
+struct Point {
+    x: i32,
+    y: i32,
+    z: i32,
+}
+
+let origin = Point { x: 0, y: 0, z: 0 };
+
+match origin {
+    Point { x, .. } => println!("x is {}", x),
+}
+
+let numbers = (2, 4, 8, 16, 32);
+
+match numbers {
+    (first, .., last) => {
+        println!("Some numbers: {}, {}", first, last);
+    },
+}
+```
+
+Extra conditions in `match`:
+
+``` rust
+let num = Some(4);
+
+match num {
+    Some(x) if x < 5 => println!("less than five: {}", x),
+    Some(x) => println!("{}", x),
+    None => (),
+}
+
+let x = 4;
+let y = false;
+
+match x {
+    4 | 5 | 6 if y => println!("yes"),
+    _ => println!("no"),
+}
+```
+
+Bindings with `@`:
+
+``` rust
+enum Message {
+    Hello { id: i32 },
+}
+
+let msg = Message::Hello { id: 5 };
+
+match msg {
+    Message::Hello { id: id_variable @ 3..=7 } => {
+        println!("Found an id in range: {}", id_variable)
+    },
+    Message::Hello { id: 10..=12 } => {
+        println!("Found an id in another range")
+    },
+    Message::Hello { id } => {
+        println!("Found some other id: {}", id)
+    },
+}
+```
+
+## Advance Rust
+
+### Unsafe Rust
+
+Unsafe Rust the ability to:
+
+ - Dereference a raw pointer
+ - Call an unsafe function or method
+ - Access or modify a mutable static variable
+ - Implement an unsafe trait
+ - Access fields of unions
+
+Unsafe block starts with `unsafe` keyword:
+
+```rust
+unsafe {
+   // unsafe code
+}
+```
+
+Raw pointers:
+
+``` rust
+let mut num = 5;
+
+// immutable raw pointer
+let r1 = &num as *const i32;
+
+// mutable raw pointer
+let r2 = &mut num as *mut i32;
+
+// the raw pointers can only be used in unsafe block
+unsafe {
+    println!("r1 is: {}", *r1);
+    println!("r2 is: {}", *r2);
+}
+```
+
+Different from references and smart pointers, raw pointers:
+
+ - Are allowed to ignore the borrowing rules by having both immutable and mutable pointers or multiple mutable pointers to the same location
+ - Aren’t guaranteed to point to valid memory
+ - Are allowed to be null
+ - Don’t implement any automatic cleanup
+
+Functions can be unsafe too:
+
+``` rust
+// function which whole body is unsafe
+unsafe fn dangerous() {}
+
+// function can be called only in unsafe block
+unsafe {
+    dangerous();
+}
+```
+
+Rust can call exteranl functions created in other languages. The feature is called Foreign Function Interface (FFI). These kind of functions are always unsafe. `extern` keyword with type of application binary interface (ABI) should be used in that case. For example for function compatible with `C` language we can write:
+
+``` rust
+extern "C" {
+    // unsafe functions
+    fn abs(input: i32) -> i32;
+}
+
+fn main() {
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
+}
+```
+
+Rust in it's turn can export functions as well (although function is safe in that case):
+
+``` rust
+#[no_mangle]
+pub extern "C" fn call_from_c() {
+    println!("Just called a Rust function from C!");
+}
+```
+
+Rust allows declaration of static variables. Static variables have lifetime `'static`. Mutable static variables are unsafe. Example:
+
+``` rust
+// safe immutable static variable
+static HELLO_WORLD: &str = "Hello, world!";
+
+// unsafe mutable static variable
+static mut COUNTER: u32 = 0;
+
+
+fn main() {
+    // safe to use
+    println!("name is: {}", HELLO_WORLD);
+
+    // must be marked unsafe
+    unsafe {
+        COUNTER += 1;
+        println!("COUNTER: {}", COUNTER);
+    }
+}
+```
+
+Note, const and immutable static variables differ in that static variable has fixed memory address while const value can be directly substituted in the code.
+
+Traits can be unsafe too:
+
+``` rust
+unsafe trait Foo {
+    // methods go here
+}
+
+unsafe impl Foo for i32 {
+    // method implementations go here
+}
+```
+
+For example the compiler implements `Send` and `Sync` traits automatically if a type is composed entirely of `Send` and `Sync` types. If we implement a type that contains a type that is not `Send` or `Sync`, such as raw pointers, and we want to mark that type as `Send` or `Sync`, we must use `unsafe`.
+
+### Advanced traits
+
+Traits can contain type placeholder for an associated type. E.g.:
+
+```rust
+pub trait Iterator {
+    // placeholder type
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+}
+
+// implementation
+impl Iterator for Counter {
+    // u32 is associated type
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // --snip--
+```
+
+The idea looks similar to generic types. The difference is that when using associated type trait can be implemented only once for certain associated type, while when using generic type trait can be implemented many times, and concrete type must be specified explicitly.
+
+*Default generic type and operator overloading*
+
+For generic type default value can be assigned.
+It is used in two main ways:
+ - To extend a type without breaking existing code
+ - To allow customization in specific cases most users won’t need
+
+Example for the first use-case:
+
+```rust
+// initally trait had no generic type
+trait MyTrait {
+    fn my_fun(self, param: u32);
+}
+
+// after some time we decided to exted it with generic type
+// and to not break code that uses the trait default type is assigned
+// for the generic type
+trait MyTrait <T=u32> {
+    fn my_fun(self, param: T);
+}
+```
+
+Example for the second use-case:
+
+```rust
+// std has a trait implementing "+" operator.
+// The default implementation allows adding two values of the 
+// same type which is the most common case of using "+" operator.
+//
+// trait Add<RHS=Self> {
+//     type Output;
+//
+//     fn add(self, rhs: RHS) -> Self::Output;
+// }
+
+
+use std::ops::Add;
+
+// a sample 2d vector type
+#[derive(Debug)]
+struct Vector2 {x: i32, y: i32 }
+
+// implementation for default type
+impl Add for Vector2 {
+   type Output = Vector2;
+
+   // add two vercors
+   fn add(self, rhs: Vector2) -> Self::Output {
+       Vector2 {
+          x: rhs.x + self.x,
+          y: rhs.y + self.y
+       }
+   }
+}
+
+// implementation for custom type
+impl Add<i32> for Vector2 {
+   type Output = Vector2;
+
+   // add two scalar to vector
+   fn add(self, rhs: i32) -> Self::Output {
+       Vector2 {
+          x: rhs + self.x,
+          y: rhs + self.y
+       }
+   }
+}
+
+fn main() {
+    let v1 = Vector2 { x: 1, y: 2 };
+    let v2 = Vector2 { x: 2, y: 3 };
+    let v3 = Vector2 { x: -1, y: 1 };
+
+    println!("{:?}", v1 + v2);
+    println!("{:?}", v3 + 5);
+}
+```
+
+*Calling methods with the same name*
+
+A struct and a trait which the struct is implementing can define methods with the same signature, e.g.:
+
+``` rust
+struct MyStruct;
+
+impl MyStruct {
+    fn my_fun(&self) {
+        println!("Calling method of MyStruct instance");
+    }
+}
+
+trait SomeTrait {
+    // the same signature as in MyStruct
+    fn my_fun(&self);
+}
+
+impl SomeTrait for MyStruct {
+    fn my_fun(&self) {
+        println!("Calling method of SomeTrait instance");
+    }
+}
+
+fn main() {
+    let obj = MyStruct;
+    obj.my_fun();           // will print "Calling method of MyStruct instance"
+    MyStruct::my_fun(&obj);  // will print "Calling method of MyStruct instance"
+    SomeTrait::my_fun(&obj); // will print "Calling method of SomeTrait instance"
+}
+```
+
+For methods that don't have `self` argument the following general purpose syntax can be used:
+
+```rust
+<Type as Trait>::function(receiver_if_method, next_arg, ...);
+```
+
+Example:
+
+``` rust
+struct MyStruct;
+
+impl MyStruct {
+    // doesn't take self this time
+    fn my_fun() {
+        println!("Calling fun of MyStruct instance");
+    }
+}
+
+trait SomeTrait {
+    // the same signature as in MyStruct
+    fn my_fun();
+}
+
+impl SomeTrait for MyStruct {
+    fn my_fun() {
+        println!("Calling fun of SomeTrait instance");
+    }
+}
+
+fn main() {
+    MyStruct::my_fun();                // will print "Calling method of MyStruct instance"
+    <MyStruct as SomeTrait>::my_fun(); // will print "Calling method of SomeTrait instance"
+}
+```
+
+*Supertraits*
+
+Using supertraits allows one trait to use another trait’s functionality.
+
+Example:
+
+``` rust
+trait BaseTrait {
+    fn print_data(s: &str) {
+        println!("{}", s);
+    }
+}
+
+trait DecoratorTrait : BaseTrait {
+    // the same signature as in MyStruct
+    fn decorate(s: &str) {
+        println!("{}", "=".repeat(str::len(s)));
+
+        // the function from BaseTrait now can be used
+        Self::print_data(s);
+        
+        println!("{}", "=".repeat(str::len(s)));
+    }
+}
+
+struct MyStruct;
+impl DecoratorTrait for MyStruct {}
+impl BaseTrait for MyStruct {}
+
+fn main() {
+    MyStruct::decorate("The data");
+}
+```
+
+*Newtype pattern*
+
+_Newtype_ pattern can be used to implement a trait defined in a different crate on a struct or enum defined in another crate. Because it is not possible to do directly the type can be wrapped in struct for which the trait will be implemented.
+
+Example:
+
+``` rust
+use std::fmt;
+
+// because Display trait can't be implemented directly for Vec
+// the wrapper is used
+struct Wrapper(Vec<String>);
+
+impl fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}]", self.0.join(", "))
+    }
+}
+
+fn main() {
+    let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+    println!("w = {}", w);
+}
+```
+
+Newtype pattern also can be used for:
+  - abstracting away or hiding some implementation details of a type
+  - distinguishing types of the same structure, e.g. to distinguish units of measure of something
+
+### Advanced types
+
+Type alias can be used to make a new type name, e.g.:
+
+``` rust
+type Kilometers = i32;
+
+let x: Kilometers = 1;
+let y: i32 = 1;
+
+// the alias is not a new type but just an alternative name
+assert_eq!(x, y);
+```
+
+Type alias can be used to shortten complex names, e.g:
+
+```rust
+type Thunk = Box<dyn Fn() + Send + 'static>;
+
+let f: Thunk = Box::new(|| println!("hi"));
+
+fn takes_long_type(f: Thunk) {
+    // --snip--
+}
+
+fn returns_long_type() -> Thunk {
+    // --snip--
+}
+```
+
+Another example:
+
+```rust
+// makes code easier to write 
+// and it gives a consistent interface across all of std::io
+type Result<T> = std::result::Result<T, std::io::Error>;
+```
+
+*Never type*
+
+Type never is a type that can be used for functions that never return, or for infinite loops. The type is denoted `!`.
+
+Example:
+
+``` rust
+// the function that never returns (diverging function)
+fn bar() -> ! {
+    // --snip--
+}
+```
+
+Type Never can be coerced to any type, e.g.:
+
+``` rust
+let search = Some(5);
+
+let val: u32 = match search {
+    Some(num) => num,
+    None(_) => continue,        // continue returns Never
+                                // but is coerced to u32 at compile time
+};
+```
+
+*Sized trait and dynamically sized types*
+
+_Dynamically sized types_ (DSTs or unsized types) let us write code using values whose size we can know only at runtime. Dynamically sized type is described with a pointer, and it's data length.
+
+The golden rule of dynamically sized types is that we must always put values of dynamically sized types behind a pointer of some kind.
+
+e.g. `str` is DST and can be accessed only as reference: `&str`, `Box<str>`, `Rc<str>`, etc. Also having a trait `Trait` the construct `&dyn Trait` is DST.
+
+Rust has a particular trait called the `Sized`. The trait is used for every type whose size is known at compile time. Trait `Sized` is automatically added to every generic type, i.e.:
+
+```rust
+fn generic<T>(t: T) {
+    // --snip--
+}
+```
+
+is eqivalent to
+
+```rust
+fn generic<T: Sized>(t: T) {
+    // --snip--
+}
+```
+
+The rule can be relaxed like this
+
+``` rust
+// T can be Sized but not necessary
+// because of that function can accept only pointer: &T
+fn generic<T: ?Sized>(t: &T) {
+    // --snip--
+}
+```
+
+### Advanced functions and closures
+
+Functions can be passed as arguments to other functions. Any function coerce to the type `fn`. The `fn` type is called a _function pointer_.
+
+Example: 
+
+``` rust
+fn add_one(x: i32) -> i32 {
+    x + 1
+}
+
+fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 {
+    f(arg) + f(arg)
+}
+
+fn main() {
+    let answer = do_twice(add_one, 5);
+
+    println!("The answer is: {}", answer);
+}
+```
+
+Function pointers implement all three of the closure traits (Fn, FnMut, and FnOnce). Function pointer can alway be passed as an argument for a function that expects a closure. It’s best to write functions using a generic type and one of the closure traits so your functions can accept either functions or closures.
+
+The initializer `()` in strcts is also of function type, e.g:
+
+``` rust
+enum Status {
+    Value(u32),
+    Stop,
+}
+
+let list_of_statuses: Vec<Status> =
+    (0u32..20)
+    .map(Status::Value)
+    .collect();
+```
+
+### Macros
+
+Macros are a way of writing code that writes other code.
+The term macro refers to a family of features in Rust: 
+ - declarative macros with `macro_rules!`
+ - procedural macros, there are three kind of them:
+  * Custom `#[derive]` macros that specify code added with the derive attribute used on structs and enums
+  * Attribute-like macros that define custom attributes usable on any item
+  * Function-like macros that look like function calls but operate on the tokens specified as their argument
+
+Macros can take a variable number of parameters compared to functions.
+Macros must appear in the scope before you call them.
+
+Declarative macros are most widely used in Rust. The syntax is somewhat similar to `match` expression, e.g.:
+
+```rust
+// export allows to bring macro in the scope when crate is imported
+#[macro_export]
+macro_rules! vec {
+    // matches a list of Rust expressions followed by comma,
+    // zero or more expressions expected
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push($x);
+            )*
+            temp_vec
+        }
+    };
+}
+```
+
+For `vec![1, 2, 3];` the reuslting code will be:
+
+```rust
+let mut temp_vec = Vec::new();
+temp_vec.push(1);
+temp_vec.push(2);
+temp_vec.push(3);
+temp_vec
+```
+
+The macros in details are described in [The Little Book of Rust Macros](https://danielkeep.github.io/tlborm/book/index.html)
+
+
+Procedural macros take a `TokenStream` and produce `TokenStream` in result.
+When creating procedural macros, the definitions must reside in their own crate with special type.
+The general template for procedural macro is:
+
+``` rust
+use proc_macro;
+
+#[some_attribute]
+pub fn some_name(input: TokenStream) -> TokenStream {
+}
+```
+
+Example of custom `derive` macro.
+
+Call:
+
+> cargo new hello_macro --lib
+
+In `src/lib.rs` add:
+
+``` rust
+pub trait HelloMacro {
+    fn hello_macro();
+}
+```
+
+Inside `hello_macro` directory call:
+
+> cargo new hello_macro_derive --lib
+
+In `hello_macro_derive/Cargo.toml` specify:
+
+``` rust
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "0.14.4"
+quote = "0.6.3"
+```
+
+In `hello_macro_derive/src/lib.rs` add:
+
+```rust
+extern crate proc_macro;
+
+use crate::proc_macro::TokenStream;
+use quote::quote;
+use syn;
+
+#[proc_macro_derive(HelloMacro)]
+pub fn hello_macro_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate.
+    // The AST looks like this:
+    //   DeriveInput {
+    //       // --snip--
+    //
+    //       ident: Ident {
+    //           ident: "Pancakes",
+    //           span: #0 bytes(95..103)
+    //       },
+    //       data: Struct(
+    //           DataStruct {
+    //               struct_token: Struct,
+    //               fields: Unit,
+    //               semi_token: Some(
+    //                   Semi
+    //               )
+    //           }
+    //       )
+    //   }
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_hello_macro(&ast)
+}
+
+fn impl_hello_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl HelloMacro for #name {
+            fn hello_macro() {
+                println!("Hello, Macro! My name is {}", stringify!(#name));
+            }
+        }
+    };
+    gen.into()
+}
+```
+
+Then other crates can import the macro with specifying dependencies:
+
+```
+[dependencies]
+hello_macro = { path = "../hello_macro" }
+hello_macro_derive = { path = "../hello_macro/hello_macro_derive" }
+```
+
+Attribute-like macro.
+
+Example:
+
+```
+#[route(GET, "/")]
+fn index() {
+    ...
+```
+
+The macro definition will look like:
+
+``` rust
+#[proc_macro_attribute]
+pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
+```
+
+The first TokenStream named attr accepts macro attributes `GET, "/"`, the second TokenStream item contains body of the item to which attribute is applied.
+
+Function-like macro.
+
+Example:
+
+```rust
+let sql = sql!(SELECT * FROM posts WHERE id=1);
+```
+
+The macro definition will look like:
+
+```rust
+#[proc_macro]
+pub fn sql(input: TokenStream) -> TokenStream {
+    ...
+```
