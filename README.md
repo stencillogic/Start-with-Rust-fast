@@ -1301,7 +1301,6 @@ Generic data types do not have influence on performance of resulting code.
 
 ### Traits
 
-
 Trait defines specific behaviour of a type. Trait is similar to interface in Java.
 
 Trait can have methods without implementation or with default implementation. Not-implemented methods of a trait can be called inside other methods of the trait with default implementation.
@@ -1311,7 +1310,7 @@ Coherence (or orphan rule): we can't implement trait defined in a different crat
 Examples:
 
 ``` rust
-// trait defenition
+// trait definition
 pub trait Summary {
     fn summarize(&self) -> String;
 }
@@ -1348,7 +1347,7 @@ impl Summary for Tweet {
 
 ```
 
-Calling trait method example:
+Calling of a trait method example:
 
 ``` rust
 let tweet = Tweet {
@@ -1361,7 +1360,7 @@ let tweet = Tweet {
 println!("1 new tweet: {}", tweet.summarize());
 ```
 
-Default implementation of trait method example:
+Default implementation of a trait method example:
 
 ``` rust
 // a trait with default method implementation
@@ -1394,6 +1393,7 @@ pub trait Summary {
     }
 }
 ```
+
 ### Trait bound
 
 Generic type can be bound to certain traits. In that case generic type must implement those traits.
@@ -1483,19 +1483,21 @@ fn main() {
 
 ### Lifetimes
 
-Lifetime is a characteristic of a reference. Lifetime defines scope of function arguments which are of reference type and return value if it is of reference time. Sometimes compiler can infer lifetime automatically, but in other situations compiler might not know what is assumed lifetime of references coming an going out of a function.
+_Lifetime_ is a characteristic of a reference. Lifetime defines scope of function arguments which are of reference type and return value if it is of reference type. Sometimes compiler can infer lifetime automatically, but in other situations compiler might not know what is an assumed lifetime of references coming into and going out of a function.
 
 Syntax:
 
 ``` rust
 &i32        // a reference
-&'a i32     // a reference with an explicit lifetime
-&'a mut i32 // a mutable reference with an explicit lifetime
+&'a i32     // a reference with explicit lifetime
+&'a mut i32 // a mutable reference with explicit lifetime
 ```
 
 Example:
 
 ``` rust
+// we tell compiler that the result of the function
+// will live as long as arguments of the function
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() > y.len() {
         x
@@ -1512,20 +1514,20 @@ fn main() {
 
         // result can be a reference to string1 or string2 
         // which one is not known at compile time
-        // for that explicit lifetime in function definition is used to explicitly
-        // tell compiler that lifetime for both arguments and return value is the same
+        // for that, explicit lifetime in the function definition is used to explicitly
+        // tell compiler that the lifetime for both arguments and return value is the same
         let result = longest(string1.as_str(), string2.as_str());
         println!("The longest string is {}", result);
     }
 }
 ```
 
-We can't specify reference as a data type of struct field unless we use lifetime.
+We can't specify reference as data type of struct field unless we use lifetime.
 Example:
 
 ``` rust
 struct ImportantExcerpt<'a> {
-    part: &'a str,
+    part: &'a str,                // wouldn't work without lifetime
 }
 
 fn main() {
@@ -1540,8 +1542,8 @@ fn main() {
 }
 ```
 
-When explicit annotations are omitted the compiler uses three rules to figure out what lifetimes references have when there aren’t explicit annotations.
-Lifetime elision rules:
+Compiler uses three rules to figure out what lifetimes references have when there are no explicit lifetimes specified. THese are 
+_lifetime elision rules_:
 
 1. Each parameter that is a reference gets its own lifetime parameter. In other words, a function with one parameter gets one lifetime parameter: `fn foo<'a>(x: &'a i32);` a function with two parameters gets two separate lifetime parameters: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);` and so on.
 
@@ -1566,13 +1568,13 @@ fn first_word<'a>(s: &'a str) -> &'a str {
 fn longest(x: &str, y: &str) -> &str {
 ```
 
-will become
+will become:
 
 ``` rust
 fn longest<'a, 'b>(x: &'a str, y: &'b str) -> &str {
 ```
 
-For method:
+And for method:
 
 ``` rust
 impl<'a> ImportantExcerpt<'a> {
@@ -1586,14 +1588,14 @@ impl<'a> ImportantExcerpt<'a> {
 }
 ```
 
-`'static` is a special lifetime which means that this reference can live for the entire duration of the program. All string literals have the `'static` lifetime.
+`'static` is a special lifetime which means that this reference can live for the entire duration of the program. All references to string literals have `'static` lifetime.
 
 
 ## Testing
 
 Rust provides means for unit-testing and integration testing.
 
-Unit tests usually created in the same file with tested functionality. E.g.
+Unit tests are usually created in the same file with tested functionality. E.g.
 
 ``` rust
 fn some_func(arg: i32) -> i32 {
@@ -1607,7 +1609,7 @@ mod tests {
     // bring some_func into scope of this test module
     use super::*;
 
-    // not test function
+    // non-test function
     fn some_setup() {
         println!("I do nothing");
     }
@@ -1621,7 +1623,7 @@ mod tests {
         assert_ne!(v, v+1, "additional message goes here");
     }
 
-    // some test func which sould panic with certain message, then test succeeds.
+    // some test func which should panic with certain message; then test succeeds.
     // Value of expected argument in should_panic annotation treated as substring 
     // of panic message thrown by the test
     #[test]
@@ -1652,8 +1654,8 @@ mod tests {
 Assertion macros should be used in unit-tests. Available macros include:
 
  - `assert!`: accepts boolean argument of type bool. Test fails if argument is false.
- - `assert_eq!`: accepts two arguments and uses == operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
- - `assert_ne!`: accepts two arguments and uses != operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
+ - `assert_eq!`: accepts two arguments and uses `==` operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
+ - `assert_ne!`: accepts two arguments and uses `!=` operator to check if arguments are equal, prints the values if test fails. Arguments must implement `PartialEq` and `Debug` traits.
 
 Running all tests:
 
@@ -1663,7 +1665,7 @@ Running specific tests:
 
 > cargo test test1
 
-Cargo searches for substring in test name and if it matches test is executed, i.e. if `cargo test test1` will also run `test12`, `test1_3`, etc.
+Cargo searches for substring in test name and, if it matches, test is executed, i.e. `cargo test test1` would also run `test12`, `test1_3`, etc.
 
 By default tests run in parallel in several threads. It can lead to contention on some shared resources, e.g. files. The number of threads is configurable as well:
 
@@ -1677,10 +1679,9 @@ Run tests with `ignore` annotation:
 
 > cargo test -- --ignored
 
+_Integration tests_ should be placed in a separate directory named `tests` in the root of your project. Each file in tests directory is a separate crate representing integration test. Functions which are common to all integration tests can be put in `tests/<some_dir>/mod.rs`. `tests/<some_dir>/mod.rs` will not be interpreted as integration test.
 
-Integration tests should be placed in separated directory named `tests` in the root of your project. Each file in tests directory is a separate crate representing integration test. Functiona which are common to all integration tests can be put in `tests/<some_dir>/mod.rs`. `tests/<some_dir>/mod.rs` will not be interpreted as integration test in that case.
-
-In case of binary package it is not possible to perform integration tests agains it. It is common practice to make library package and pull almost everything insode library. Along with it create a binary package with small amout of unctionlality which uses the library.
+In case of binary package it is not possible to perform integration tests agains it. It is common practice to make library package and pull almost everything inside library. Along with it, create a binary package with small amout of functionlality which uses the library.
 
 
 ## Closures, iterators, and functional features
@@ -1695,15 +1696,15 @@ Examples:
 // standard function
 fn  add_one_v1   (x: u32) -> u32 { x + 1 }
 
-// closures
+// similar closures
 // each of add_one_v variables below has unique anonymous type
 let add_one_v2 = |x: u32| -> u32 { x + 1 };
 let add_one_v3 = |x|             { x + 1 };
 let add_one_v4 = |x|               x + 1  ;
 ```
 
-Closure is analogous to function, but data type specification is not mandatory becuase compiler can always infer data type.
-Data type can be inferred just once.
+Closures are similar to functions, but data type specification is not mandatory becuase compiler can always infer data type.
+Data type can be inferred just once, at first use in code, e.g.:
 
 ``` rust
 let example_closure = |x| x;
@@ -1727,7 +1728,7 @@ fn main() {
 
 Closures (and functions) implement traits `FnOnce`, `FnMut`, and `Fn`:
 
- - `FnOnce` consumes the variables it captures from its enclosing scope, known as the closure’s environment. To consume the captured variables, the closure must take ownership of these variables and move them into the closure when it is defined. The Once part of the name represents the fact that the closure can’t take ownership of the same variables more than once, so it can be called only once.
+ - `FnOnce` consumes the variables it captures from its enclosing scope, known as the closure’s environment. To consume the captured variables, the closure must take ownership of these variables and move them into the closure when it is defined. The "Once" part of the name represents the fact that the closure can’t take ownership of the same variables more than once, so it can be called only once.
  - `FnMut` can change the environment because it mutably borrows values.
  - `Fn` borrows values from the environment immutably.
 
@@ -1755,11 +1756,11 @@ let x = vec![1, 2, 3];
 let equal_to_x = move |z| z == x;    // x is moved out of scope and can't be used after this line
 ```
 
-`move` can be used to pass closure with captured environment to a different thread.
+`move` is useful for passing closure with captured environment to a different thread.
 
 ### Iterators
 
-Iterator allows to perform tasks on sequences of items.
+_Iterator_ allows to perform tasks on sequences of items.
 
 Examples:
 
@@ -1767,18 +1768,19 @@ Examples:
 // define vector of integers
 let v1 = vec![1, 2, 3];
 
-// get mutable iterator over elements
+// get mutable iterator over vector elements
+// if iterator is not mutable method next cannot be called
 let mut v1_iter = v1.iter();
 
-// use next method to fetch next item
+// use method next to fetch items
 // method next returns immutable reference to a value
 assert_eq!(v1_iter.next(), Some(&1));
 assert_eq!(v1_iter.next(), Some(&2));
 assert_eq!(v1_iter.next(), Some(&3));
 assert_eq!(v1_iter.next(), None);
 
-// to iterate over items once more new iterator is required
-// getting new immutable iterator
+// to iterate over items once more a new iterator is required
+// getting a new immutable iterator
 let v1_iter = v1.iter();
 
 // use iterator in for loop
@@ -1796,9 +1798,8 @@ pub trait Iterator {
 
     fn next(&mut self) -> Option<Self::Item>;
 
-    // methods with default implementations elided
-    // the trait also provides default implementations for those methods
-    // methods include: 
+    // methods with default implementations are elided.
+    // The trait also provides default implementations for:
     //   collect - make a collection, 
     //   sum - calculate sum of all items, 
     //   map - perform calculation on every item
@@ -1840,9 +1841,9 @@ impl Iterator for Counter {
 // usage example
 fn main() {
     let d = 3;
-    let sum: u32 = Counter::new().zip(Counter::new().skip(1))
-                                 .map(|(a, b)| a * b)          // map uses closure
-                                 .filter(|x| x % d == 0)       // d is captured from outer scope
+    let sum: u32 = Counter::new().zip(Counter::new().skip(1))  // zip produces tuples (a,b)
+                                 .map(|(a, b)| a * b)          // map uses closure to process items of iterator
+                                 .filter(|x| x % d == 0)       // in filter closure captures d from outer scope
                                  .sum();
     assert_eq!(18, sum);
 }
@@ -1857,7 +1858,7 @@ Use of iterators does not introduce additional performance penalty compared to l
 
 `///` is interpreted as markdown and can contain sections:
 
- - Examples: usage examples. `cargo test` runs not only nit and integration tests but also code from examples.
+ - Examples: usage examples. `cargo test` runs not only unit and integration tests but also code of this section.
  - Panics: The scenarios in which the function being documented could panic.
  - Errors: If the function returns a Result, describes the kinds of errors that might occur and what conditions might cause those errors.
  - Safety: If the function is unsafe to call there should be a section explaining why the function is unsafe and covering the invariants that the function expects callers to uphold.
@@ -1885,11 +1886,13 @@ pub fn add_one(x: i32) -> i32 {
 //!
 //! `my_crate` is a collection of utilities to make performing certain
 //! calculations more convenient.
+
+...
 ```
 
 ## Workspaces
 
-Project can be organized as workspace. E.g.:
+Project can be organized as _workspace_. E.g.:
 
 ```
 <workspace_dir>
@@ -1906,7 +1909,7 @@ Project can be organized as workspace. E.g.:
 └── target
 ```
 
-Workspace has Cargo.lock and Cargo.toml in the root of the workspace folder. THe files are common to all creates inside the workspace.
+Workspace has Cargo.lock and Cargo.toml in the root of the workspace folder. The files are common to all creates inside the workspace.
 Workspace also has single target directory.
 
 `<workspace_dir>/Cargo.toml` has contents:
@@ -1924,10 +1927,10 @@ Cargo.toml in subdirectories has contents typical to any package.
 
 ## Smart pointers
 
-Smart pointers allow to allocate data on heap, count references, free up memory automatically, and other things.
+Smart pointers allow to allocate data on heap, count references, free up memory automatically, and do other things.
 Basic smart pointers:
 
- - `Box<T>` for allocating values on the heap.
+ - `Box<T>` is for allocating values on the heap.
  - `Rc<T>`, a reference counting type that enables multiple ownership.
  - `Ref<T>` and `RefMut<T>`, accessed through `RefCell<T>`, a type that enforces the borrowing rules at runtime instead of compile time.
 
@@ -1940,7 +1943,7 @@ They have the following properties and use-cases:
 ### Box
 
 Boxes are used in the following situations:
- - When you have a type whose size can’t be known at compile time and you want to use a value of that type in a context that requires an exact size
+ - When you have a type whose size can't be known at compile time and you want to use a value of that type in a context that requires an exact size
  - When you have a large amount of data and you want to transfer ownership but ensure the data won’t be copied when you do so
  - When you want to own a value and you care only that it’s a type that implements a particular trait rather than being of a specific type
 
@@ -1952,7 +1955,7 @@ Examples:
 // recursive data structure
 #[derive(Debug)]
 enum List {
-    Cons(i32, Box<List>),           // can't reference List directly becuase size 
+    Cons(i32, Box<List>),           // can't reference List directly without Box becuase size 
                                     // of the structure is not known at compile time
     Nil,
 }
@@ -1965,13 +1968,14 @@ fn main() {
             Box::new(Cons(3,
                 Box::new(Nil))))));
 
+    // "{:?}" prints type implementing Debug trait
     println!("{:?}", list);
 }
 ```
 
 ### Deref trait
 
-`Box` implements `Deref` whic allows to do the following:
+`Box` implements `Deref` which allows to do the following:
 
 ``` rust
 fn main() {
@@ -2014,7 +2018,8 @@ fn main() {
 }
 ```
 
-Deref coercion is automatic conversion from reference to type implemeting `Deref` to reference type returned by `deref()` method of the trait.
+_Deref coercion_ is automatic conversion from type implemeting `Deref` to reference type returned by `deref()` method of the trait.
+
 Example:
 
 ``` rust
@@ -2024,20 +2029,22 @@ fn hello(name: &str) {
 
 fn main() {
     let m = MyBox::new(String::from("Rust"));
-    hello(&m);   // &m is identical to &(*(m.deref())).deref()
+    hello(&m);   // MyBox is coerced to &String, and String is coerced to &str
 }
 ```
 
-The `DerefMut` trait can be used to override the * operator on mutable references.
+Similary to `Deref` the `DerefMut` trait can be used to override the `*` operator on mutable references.
 Rust does deref coercion when it finds types and trait implementations in three cases:
 
  - From `&T` to `&U` when `T: Deref<Target=U>`
  - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
  - From `&mut T` to `&U` when `T: Deref<Target=U>`
 
-In the third case Rust will coerce a mutable reference to an immutable one. But the reverse is not possible becuase there can be several users of immutable reference and just one user of mutable one.
+In the third case Rust will coerce a mutable reference to an immutable one. But the reverse is not possible becuase there can be several users of immutable reference and just one user of mutable.
 
 ### Drop trait
+
+`Drop` trait is used to define behaviour when smart pointer goes out of scope.
 
 Example:
 
@@ -2056,7 +2063,7 @@ fn main() {
     let c = CustomSmartPointer { data: String::from("my stuff") };
     let d = CustomSmartPointer { data: String::from("other stuff") };
     println!("CustomSmartPointers created.");
-}    // drop is automatically called on the end of scope
+}    // drop is automatically called at the end of scope
 ```
 
 Dropping explicitly:
@@ -2078,6 +2085,7 @@ fn main() {
 ### Reference counting with Rc<T>
 
 The `Rc<T>` type keeps track of the number of references to a value which determines whether or not a value is still in use. 
+
 Example:
 
 ```rust
@@ -2098,11 +2106,11 @@ fn main() {
 // and Rc drops owned data
 ```
 
-`Rc::clone` doesn’t make a deep copy of all the data. It just copies smart pointer instance in increments use counter. Data is dropped when use counter becomes 0.
+`Rc::clone` doesn’t make a deep copy of all the data. It just copies smart pointer instance and increments use counter. Data is dropped when use counter becomes 0.
 
 ### Interior mutability with RefCell<T>
 
-Interior mutability is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data.
+_Interior mutability_ is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data.
 
 `RefCell<T>` implements borrowing rules at runtime:
 
@@ -2127,50 +2135,41 @@ fn main() {
       f2: "can't mutate".to_string() 
     };
 
-    // a is immutable, but f1 can be changed; a.f2 can't be changed
+    // a is immutable, but f1 can be changed; and a.f2 can't be changed
     *a.f1.borrow_mut() = "mutated".to_string();
 
     println!("{}; {}", a.f1.borrow(), a.f2);
 }
 ```
 
-Use case for `RefCell<T>` is for example mocking objects in tests.
-`RefCell<T>` keeps track of borrows. E.g. you can't borrow twice with `borrow_mut()`, or call `borrow_mut()` when values is already borrowed for read with `borrow()`.
+`RefCell<T>` keeps track of borrows. E.g. you can't borrow twice with `borrow_mut()`, or call `borrow_mut()` when values is already borrowed for read with `borrow()`. Although type `Rc<RefCell<T>>` allows you to have several holders of data that can mutate.
 
-Type `Rc<RefCell<T>>` allows to have several holders of data that can mutate.
 Example:
 
 ``` rust
-#[derive(Debug)]
-enum List {
-    Cons(Rc<RefCell<i32>>, Rc<List>),
-    Nil,
-}
-
-use crate::List::{Cons, Nil};
 use std::rc::Rc;
 use std::cell::RefCell;
 
 fn main() {
-    let value = Rc::new(RefCell::new(5));
+    let v = Rc::new(RefCell::new(5));
 
-    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+    let a = Rc::clone(&v);
 
-    let b = Cons(Rc::new(RefCell::new(6)), Rc::clone(&a));
-    let c = Cons(Rc::new(RefCell::new(10)), Rc::clone(&a));
+    // "a" is immutable
+    println!("a before = {:?}", a.borrow());
 
-    *value.borrow_mut() += 10;
+    // update "v"
+    *v.borrow_mut() += 10;
 
-    // several items refer to data that was mutated at runtime
-    println!("a after = {:?}", a);
-    println!("b after = {:?}", b);
-    println!("c after = {:?}", c);
+    // value referenced by "a" mutated as well
+    println!("a after = {:?}", a.borrow());
+    println!("v after = {:?}", v.borrow());
 }
 ```
 
 ### Avoiding reference cycles with Weak references
 
-If we have two values referencing each other with use of `Rc<T>` then when the values go out of scope both `Rc<T>` will still have value of 1 which will lead to a memory leak.
+If we have two values referencing each other with use of `Rc<T>` then when the values go out of scope both `Rc<T>` will still have count value of 1 which will lead to a memory leak. Using Weak references can help to avoid described situation.
 
 E.g. consider tree where parent reference children and children reference parent:
 
@@ -2192,7 +2191,7 @@ fn main() {
         children: RefCell::new(vec![]),
     });
 
-    // weak reference points to None
+    // weak reference points to None by now
     println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
 
     let branch = Rc::new(Node {
@@ -2204,12 +2203,13 @@ fn main() {
     // referencing parent of leaf
     *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
 
-    // weak reference points to "branch"
+    // weak reference now points to "branch"
     println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
 }
 ```
 
-`Rc::downgrade` returns a weak pointer increasing weak reference counter, and does not increase strong reference counter compared to `RC::clone`. `upgrade()` method on the Weak pointer instance returns Option: either referenced value still exists or already doesn't.
+`Rc::downgrade` returns a weak pointer increasing weak reference counter, and does not increase strong reference counter compared to `RC::clone`. `upgrade()` method on the Weak pointer instance returns `Option`: either referenced value still exists or already doesn't.
+
 
 ## Concurrency (parallelism)
 
@@ -2230,7 +2230,7 @@ fn main() {
     let handle = thread::spawn(move || {
         println!("Here's a vector: {:?}", v);
     });
-    // v is not accessible here
+    // v becomes inaccessible here
 
     // the main thread awaits for thread termination
     // and unwraps Result returned by join()
@@ -2364,17 +2364,18 @@ The `Sync` marker trait indicates that it is safe for the type implementing `Syn
 
 Manually implementing these traits involves implementing unsafe Rust code.
 
+
 ## Obect-oriented features
 
 Incapsulation is provided by `pub` keyword on modules, structures, enumerations, structure fields, and functions.
 
-Compile time polymorphism is available with use of generic types. It is also called bounded parametric polymorphism. With bounds on generics the compiler generates nongeneric implementations of functions and methods for each concrete type that we use in place of a generic type parameter. This is static dispatch.
+Compile time polymorphism is available with use of generic types. It is also called _bounded parametric polymorphism_. With bounds on generics the compiler generates nongeneric implementations of functions and methods for each concrete type that we use in place of a generic type parameter. This is called _static dispatch_.
 
 Rust does not provide rich inheritance features. Traits are used to define common behaviour.
 
 ### Dynamic polimorphism
 
-Dynamic polymorphism (dynamic dispatch) can be achieved by using trait objects. With dynamic dispatch, at runtime, Rust uses the pointers inside the trait object to know which method to call. There is a runtime cost when this lookup happens that doesn’t occur with static dispatch. Dynamic dispatch also prevents the compiler from choosing to inline a method’s code, which in turn prevents some optimizations. 
+Dynamic polymorphism (_dynamic dispatch_) can be achieved by using trait objects. With dynamic dispatch, at runtime, Rust uses the pointers inside the trait object to know which method to call. There is a runtime cost when this lookup happens that doesn’t occur with static dispatch. Dynamic dispatch also prevents the compiler from choosing to inline a method’s code, which in turn prevents some optimizations. 
 
 A trait can be used to create trait objects if all the methods defined in the trait have the following properties:
 
@@ -2479,7 +2480,7 @@ fn function_name(<pattern>: <datatype>) {
  - Wildcards
  - Placeholders
 
-Patterns come in two forms: refutable and irrefutable. Patterns that will match for any possible value passed are `irrefutable`. Patterns that can fail to match for some possible value are `refutable`.
+Patterns come in two forms: _refutable_ and _irrefutable_. Patterns that will match for any possible value passed are irrefutable. Patterns that can fail to match for some possible value are refutable.
 
 Function parameters, let statements, and for loops can only accept irrefutable patterns.
 
@@ -2617,7 +2618,7 @@ fn main() {
 }
 ```
 
-Destructuring Nested Structs and Enums:
+Destructuring nested structs and enums:
 
 ``` rust
 enum Color {
@@ -2657,7 +2658,7 @@ fn main() {
 }
 ```
 
-Destructuring Structs and Tuples:
+Destructuring structs and tuples:
 
 ``` rust
 let ((feet, inches), Point {x, y}) = ((3, 10), Point { x: 3, y: -10 });
@@ -2676,7 +2677,7 @@ fn main() {
 }
 ```
 
-Ignore some parts of the value:
+Ignore some parts of value:
 
 ``` rust
 let numbers = (2, 4, 8, 16, 32);
@@ -2703,7 +2704,7 @@ if let Some(_s) = s {                  // note s is moved to _s
 
 ```
 
-Ignoreing parts with `..` :
+Ignoring parts with `..` :
 
 ```rust
 struct Point {
@@ -2769,11 +2770,12 @@ match msg {
 }
 ```
 
+
 ## Advanced Rust
 
 ### Unsafe Rust
 
-Unsafe Rust the ability to:
+Unsafe Rust gives the ability to:
 
  - Dereference a raw pointer
  - Call an unsafe function or method
@@ -2826,7 +2828,7 @@ unsafe {
 }
 ```
 
-Rust can call exteranl functions created in other languages. The feature is called Foreign Function Interface (FFI). These kind of functions are always unsafe. `extern` keyword with type of application binary interface (ABI) should be used in that case. For example for function compatible with `C` language we can write:
+Rust can call exteranl functions created in other languages. This feature is called _Foreign Function Interface_ (FFI). These kind of functions are always unsafe. `extern` keyword with type of _application binary interface_ (ABI) should be used in that case. For example for function compatible with `C` language we can write:
 
 ``` rust
 extern "C" {
@@ -2909,19 +2911,20 @@ impl Iterator for Counter {
         // --snip--
 ```
 
-The idea looks similar to generic types. The difference is that when using associated type trait can be implemented only once for certain associated type, while when using generic type trait can be implemented many times, and concrete type must be specified explicitly.
+The idea looks similar to generic types. The difference is that when using associated type, trait can be implemented only once for certain associated type, while when using generic type, trait can be implemented many times, and concrete type must be specified explicitly.
 
 *Default generic type and operator overloading*
 
 For generic type default value can be assigned.
 It is used in two main ways:
+
  - To extend a type without breaking existing code
  - To allow customization in specific cases most users won’t need
 
 Example for the first use-case:
 
 ```rust
-// initally trait had no generic type
+// initially trait had no generic type
 trait MyTrait {
     fn my_fun(self, param: u32);
 }
@@ -3016,7 +3019,7 @@ impl SomeTrait for MyStruct {
 
 fn main() {
     let obj = MyStruct;
-    obj.my_fun();           // will print "Calling method of MyStruct instance"
+    obj.my_fun();            // will print "Calling method of MyStruct instance"
     MyStruct::my_fun(&obj);  // will print "Calling method of MyStruct instance"
     SomeTrait::my_fun(&obj); // will print "Calling method of SomeTrait instance"
 }
@@ -3093,7 +3096,7 @@ fn main() {
 
 *Newtype pattern*
 
-_Newtype_ pattern can be used to implement a trait defined in a different crate on a struct or enum defined in another crate. Because it is not possible to do directly the type can be wrapped in struct for which the trait will be implemented.
+_Newtype_ pattern can be used to implement a trait defined in a different crate on a struct or enum defined in another crate. Because it is not possible to do directly, the type can be wrapped in struct for which the trait will be implemented.
 
 Example:
 
@@ -3117,6 +3120,7 @@ fn main() {
 ```
 
 Newtype pattern also can be used for:
+
   - abstracting away or hiding some implementation details of a type
   - distinguishing types of the same structure, e.g. to distinguish units of measure of something
 
@@ -3134,7 +3138,7 @@ let y: i32 = 1;
 assert_eq!(x, y);
 ```
 
-Type alias can be used to shortten complex names, e.g:
+Type alias can be used to shorten complex names, e.g:
 
 ```rust
 type Thunk = Box<dyn Fn() + Send + 'static>;
@@ -3160,7 +3164,7 @@ type Result<T> = std::result::Result<T, std::io::Error>;
 
 *Never type*
 
-Type never is a type that can be used for functions that never return, or for infinite loops. The type is denoted `!`.
+Type _Never_ is a type that can be used for functions that never return, or for infinite loops. The type is denoted `!`.
 
 Example:
 
@@ -3187,9 +3191,7 @@ let val: u32 = match search {
 
 _Dynamically sized types_ (DSTs or unsized types) let us write code using values whose size we can know only at runtime. Dynamically sized type is described with a pointer, and it's data length.
 
-The golden rule of dynamically sized types is that we must always put values of dynamically sized types behind a pointer of some kind.
-
-e.g. `str` is DST and can be accessed only as reference: `&str`, `Box<str>`, `Rc<str>`, etc. Also having a trait `Trait` the construct `&dyn Trait` is DST.
+The golden rule of dynamically sized types is that we must always put values of dynamically sized types behind a pointer of some kind. For example, `str` is DST and can be accessed only as reference: `&str`, `Box<str>`, `Rc<str>`, etc. Also, having a trait `Trait` the construct `&dyn Trait` is DST.
 
 Rust has a particular trait called the `Sized`. The trait is used for every type whose size is known at compile time. Trait `Sized` is automatically added to every generic type, i.e.:
 
@@ -3239,9 +3241,9 @@ fn main() {
 }
 ```
 
-Function pointers implement all three of the closure traits (Fn, FnMut, and FnOnce). Function pointer can alway be passed as an argument for a function that expects a closure. It’s best to write functions using a generic type and one of the closure traits so your functions can accept either functions or closures.
+Function pointers implement all three of the closure traits (`Fn`, `FnMut`, and `FnOnce`). Function pointer can alway be passed as an argument for a function that expects a closure. It’s best to write functions using a generic type and one of the closure traits so your functions can accept either functions or closures.
 
-The initializer `()` in strcts is also of function type, e.g:
+The initializer `()` in structs is also of function type, e.g:
 
 ``` rust
 enum Status {
@@ -3266,9 +3268,9 @@ The term macro refers to a family of features in Rust:
   * Function-like macros that look like function calls but operate on the tokens specified as their argument
 
 Macros can take a variable number of parameters compared to functions.
-Macros must appear in the scope before you call them.
+Macros definition must appear in scope before you use macro.
 
-Declarative macros are most widely used in Rust. The syntax is somewhat similar to `match` expression, e.g.:
+_Declarative macros_ are most widely used in Rust. The syntax is somewhat similar to `match` expression, e.g.:
 
 ```rust
 // export allows to bring macro in the scope when crate is imported
@@ -3288,7 +3290,7 @@ macro_rules! vec {
 }
 ```
 
-For `vec![1, 2, 3];` the reuslting code will be:
+For `vec![1, 2, 3];` the resulting code will be:
 
 ```rust
 let mut temp_vec = Vec::new();
@@ -3301,7 +3303,7 @@ temp_vec
 The macros in details are described in [The Little Book of Rust Macros](https://danielkeep.github.io/tlborm/book/index.html)
 
 
-Procedural macros take a `TokenStream` and produce `TokenStream` in result.
+_Procedural macros_ take a `TokenStream` and produce `TokenStream` in result.
 When creating procedural macros, the definitions must reside in their own crate with special type.
 The general template for procedural macro is:
 
@@ -3417,7 +3419,7 @@ The macro definition will look like:
 pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
 ```
 
-The first TokenStream named attr accepts macro attributes `GET, "/"`, the second TokenStream item contains body of the item to which attribute is applied.
+The first `TokenStream` named "attr" accepts macro attributes `GET, "/"`, the second `TokenStream` named "item" contains body of the item to which attribute is applied.
 
 Function-like macro.
 
