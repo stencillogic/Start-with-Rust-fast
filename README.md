@@ -19,7 +19,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
   * [Named tuples](#named-tuples)
   * [Structure methods](#structure-methods)
 - [Enumerations and pattern matching](#enumerations-and-pattern-matching)
-  * [pattern matching](#pattern-matching)
+  * [Pattern matching](#pattern-matching)
 - [Project organization](#project-organization)
 - [Basic collections](#basic-collections)
 - [Error handling](#error-handling)
@@ -738,7 +738,7 @@ enum Option<T> {
 
 Option also has a set of methods for extracting value from `Some` and do other stuff.
 
-### pattern matching
+### Pattern matching
 
 Match operator (has similarities to Scala pattern matching or switch operator in C).
 Example:
