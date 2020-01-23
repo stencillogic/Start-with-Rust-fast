@@ -329,7 +329,7 @@ let a = 12345u32;
 
 let b = (a as f32) / 2.7;
 
-// accessing fields
+// print values
 println!("{} {}", a, b);
 ```
 
@@ -384,7 +384,7 @@ loop {
 };
 ```
 
-Keywords break and continue are available to control the flow.
+Keywords `break` and `continue` are available to control the flow of cycle.
 `break` allows exit the loop. 
 `continue` skips the remaining part of iteration.
 
@@ -452,7 +452,7 @@ In contrast:
 let s1 = String::from("hello");
 let s2 = s1;
 
-// s1 is not availalbe anymore becuase String is not basic datatype
+// s1 is not availalbe anymore becuase String is not a basic datatype
 ```
 
 In case you need both you can clone the object:
@@ -475,6 +475,7 @@ some_function(s1);
 
 // s1 is now out of the scope and is not available
 
+// another example
 let x = 5;
 
 // calling other function and passing x as argument
