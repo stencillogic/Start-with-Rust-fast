@@ -122,9 +122,13 @@ The build command also creates `Cargo.lock` which containes exact version of dep
 Also you can call:
 
 > cargo run                 # build and run the resulting application
+
 > cargo check               # quick build without making output
+
 > cargo build --release     # build the release version of app and put it in `target/release` dir
+
 > cargo doc --open          # generate html documentation from code
+
 > cargo fmt                 # format code in your project 
 
 ## Basic control structures
