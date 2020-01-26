@@ -1008,11 +1008,13 @@ fn main() {
 
 can be transformed into:
 
+```
 src
   |_main.rs
   |_submod.rs
   |_submod
     |_subsubmod.rs
+```
 
 where main.rs contains:
 
