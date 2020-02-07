@@ -8,7 +8,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
 - [Creating and building a project](#creating-and-building-a-project)
 - [Basic control structures](#basic-control-structures)
   * [Function definition](#function-definition)
-  * [Variable declaration](#varibale-declaration)
+  * [Variable declaration](#variable-declaration)
 - [Control flow](#control-flow)
   * [Conditional expressions](#conditional-expressions)
   * [Loops](#loops)
@@ -37,14 +37,14 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
   * [Box](#box)
   * [Deref trait](#deref-trait)
   * [Drop trait](#drop-trait)
-  * [Reference counting with Rc<T>](#reference-counting-with-rc)
-  * [Interior mutability with RefCell<T>](#interior-mutability-with-refcell)
+  * [Reference counting with Rc](#reference-counting-with-rc)
+  * [Interior mutability with RefCell](#interior-mutability-with-refcell)
   * [Avoiding reference cycles with Weak references](#avoiding-reference-cycles-with-weak-references)
 - [Concurrency (parallelism)](#concurrency-parallelism)
 - [Object-oriented features](#object-oriented-features)
-  * [Dynamic polimorphism](#dynamic-polimorphism)
+  * [Dynamic polymorphism](#dynamic-polymorphism)
 - [Patterns and matching](#patterns-and-matching)
-- [Advanced Rust](#advance-rust)
+- [Advanced Rust](#advanced-rust)
   * [Unsafe Rust](#unsafe-rust)
   * [Advanced traits](#advanced-traits)
   * [Advanced types](#advanced-types)
@@ -1695,7 +1695,9 @@ In case of binary package it is not possible to perform integration tests agains
 
 Closure syntax:
 
+```
 "|" [ <param_name> [ ":" <data_type> ] ] { "," <param_name> [ ":" <data_type> ] } "|" [ "->" <data_type> ] <expression>
+```
 
 Examples:
 
@@ -2089,7 +2091,7 @@ fn main() {
 }
 ```
 
-### Reference counting with Rc<T>
+### Reference counting with Rc
 
 The `Rc<T>` type keeps track of the number of references to a value which determines whether or not a value is still in use. 
 
@@ -2115,7 +2117,7 @@ fn main() {
 
 `Rc::clone` doesn’t make a deep copy of all the data. It just copies smart pointer instance and increments use counter. Data is dropped when use counter becomes 0.
 
-### Interior mutability with RefCell<T>
+### Interior mutability with RefCell
 
 _Interior mutability_ is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data.
 
