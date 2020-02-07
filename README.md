@@ -8,7 +8,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
 - [Creating and building a project](#creating-and-building-a-project)
 - [Basic control structures](#basic-control-structures)
   * [Function definition](#function-definition)
-  * [Varibale declaration](#varibale-declaration)
+  * [Variable declaration](#varibale-declaration)
 - [Control flow](#control-flow)
   * [Conditional expressions](#conditional-expressions)
   * [Loops](#loops)
@@ -41,7 +41,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
   * [Interior mutability with RefCell<T>](#interior-mutability-with-refcell)
   * [Avoiding reference cycles with Weak references](#avoiding-reference-cycles-with-weak-references)
 - [Concurrency (parallelism)](#concurrency-parallelism)
-- [Obect-oriented features](#obect-oriented-features)
+- [Object-oriented features](#object-oriented-features)
   * [Dynamic polimorphism](#dynamic-polimorphism)
 - [Patterns and matching](#patterns-and-matching)
 - [Advanced Rust](#advance-rust)
@@ -117,7 +117,7 @@ To build the project cd to <project_name> directory and call:
 
 Note, linker is not included as part of Rust. External linker is used to build output.
 The command creates `target/debug` directory where output (it can be executable or library) is saved.
-The build command also creates `Cargo.lock` which containes exact version of dependencies used to build the project. Cargo needs to lock versions because versions of dependencies in `Cargo.toml` are not exact but rather specify expected "compatibility version" while `Cargo.lock` specifies exact version.
+The build command also creates `Cargo.lock` which contains exact version of dependencies used to build the project. Cargo needs to lock versions because versions of dependencies in `Cargo.toml` are not exact but rather specify expected "compatibility version" while `Cargo.lock` specifies exact version.
 
 Also you can call:
 
@@ -162,7 +162,7 @@ fn some_func2(x: u32, y: i8) {
 }
 
 // function with arguments and return value
-fn some_func3(x: u32, y: u32) -> u32 {	// return value datatype
+fn some_func3(x: u32, y: u32) -> u32 {	// return value data type
     x + y                              // return value as expression
 }
 
@@ -188,24 +188,24 @@ fn fun_outer() {
 }
 ```
 
-### Varibale declaration
+### Variable declaration
 
 In general:
 
 ```
-"let" [ "mut" ] <var_name> [ ":" <datatype> ] [ "=" <expression> ] ";"
+"let" [ "mut" ] <var_name> [ ":" <data type> ] [ "=" <expression> ] ";"
 ```
 
 Examples:
 
 ``` rust
-// immutable variable x with value 5 and inferred datatype
+// immutable variable x with value 5 and inferred data type
 let x = 5;
 
 // mutable variable, value can be changed
 let mut x = 5;
 
-// immutable variable x with value 5 and explicit datatype
+// immutable variable x with value 5 and explicit data type
 let x: i8 = 5;
 ```
 
@@ -234,10 +234,10 @@ let x = 5;
 
 let x = x + 1;           // value has changed
 
-let x = x.to_string();   // datatype has changed to String
+let x = x.to_string();   // data type has changed to String
 ```
 
-Basic datatypes.
+Basic data types.
 
 Integers:
 
@@ -254,7 +254,7 @@ arch - depending on architecture can be 32 bit or 64 bit.
 
 Integer types allow overflow in release build, but program will panic at overflow in debug build.
 
-f32, f64 - floating poit numbers of 32- and 64-bit length correspondingly.
+f32, f64 - floating point numbers of 32- and 64-bit length correspondingly.
 
 Number literals:
 
@@ -267,7 +267,7 @@ Number literals:
 | Byte (u8 only) | b'A' |
 | Floating point | 0.2 |
 
-Datatype can be added at the end of numeric literal, e.g.:
+Data type can be added at the end of numeric literal, e.g.:
 
 ```rust
 // 127 as u8
@@ -277,7 +277,7 @@ let a = 127u8;
 let b = -1.5e+3f32;
 ```
 
-bool - boolean datatype. Boolean literals are "true" and "false".
+bool - boolean data type. Boolean literals are "true" and "false".
 
 char - single character.
 
@@ -322,7 +322,7 @@ let el1 = x.1;
 let (u, i, c) = x;
 ```
 
-Datatype casting can be performed using `as` keyword:
+Data type casting can be performed using `as` keyword:
 
 ```rust
 let a = 12345u32;
@@ -436,7 +436,7 @@ Ownership Rules:
  - There can only be one owner at a time.
  - When the owner goes out of scope, the value will be dropped.
 
-Ownership doesn't apply to simple datatypes, e.g.:
+Ownership doesn't apply to simple data types, e.g.:
 
 ``` rust
 let x = 5;
@@ -452,7 +452,7 @@ In contrast:
 let s1 = String::from("hello");
 let s2 = s1;
 
-// s1 is not availalbe anymore becuase String is not a basic datatype
+// s1 is not available anymore because String is not a basic data type
 ```
 
 In case you need both you can clone the object:
@@ -863,7 +863,7 @@ fn main() {
 }
 ```
 
-`submod` is accessible without `pub` becuase it is on the same level as function `main`.
+`submod` is accessible without `pub` because it is on the same level as function `main`.
 `subsubmod` and `subfunc` are not accessible from `main`.
 
 `use` keyword brings symbols from submodules to the current scope, e.g.:
@@ -1060,7 +1060,7 @@ Usage examples:
 // create vector
 let v: Vec<i32> = Vec::new();
 
-// create vector using macro, datatype is iferred from the data
+// create vector using macro, data type is inferred from the data
 let mut v = vec![1, 2, 3];
 
 // add an element
@@ -1098,7 +1098,7 @@ To store elements of different types or structure `enum` or `trait` can be used.
 
 String.
 
-String allows to store and manipulate text strings. `String` datatype stores utf-8 encoded strings. For other encodings other datatypes exist.
+String allows to store and manipulate text strings. `String` data type stores utf-8 encoded strings. For other encodings other data types exist.
 
 Usage example:
 
@@ -1153,8 +1153,8 @@ use std::collections::HashMap;
 
 let mut hm = HashMap::new();
 
-// keys and values have fixed datatypes
-// datatypes here are inferred automatically from the data
+// keys and values have fixed data types
+// data types here are inferred automatically from the data
 hm.insert(String::from("Blue"), 10);
 hm.insert(String::from("Yellow"), 50);
 
@@ -1216,9 +1216,9 @@ let f3 = File::open("log.txt").unwrap_or_else(|_| -> File {f2});
 Error propagation.
 
 `?` operator can be used inside function returning `Result` type.
-The `?` placed after a `Result` value will interrupt execution in case of Err and function will return Err result. If the `Result` value is Ok `?` returns unwrapped value of Ok and processing continues.
+The `?` placed after a `Result` value will interrupt execution in case of `Err` and function will return `Err` result. If the `Result` value is `Ok` then `?` returns unwrapped value of Ok and processing continues.
 
-Retrun type of the function can differ from Err type passed to `?` operator. 
+Return type of the function can differ from `Err` type passed to `?` operator. 
 Error values that have the `?` operator called on them go through the `from` function defined in the `From` trait in the standard library, which is used to convert errors from one type into another.
 
 Example:
@@ -1244,14 +1244,14 @@ Generic data types can be used in functions, structures, and enumerations.
 Basic usage examples:
 
 ``` rust
-// generic datatype in a function
+// generic data type in a function
 fn my_fun<T>(arg: T) -> T {
     println!("Sample fun called");
     arg
 }
 
 
-// generic datatype in sctructure
+// generic data type in sctructure
 struct MyStruct<T> {
     f: T,
 }
@@ -1549,7 +1549,7 @@ fn main() {
 }
 ```
 
-Compiler uses three rules to figure out what lifetimes references have when there are no explicit lifetimes specified. THese are 
+Compiler uses three rules to figure out what lifetimes references have when there are no explicit lifetimes specified. These are 
 _lifetime elision rules_:
 
 1. Each parameter that is a reference gets its own lifetime parameter. In other words, a function with one parameter gets one lifetime parameter: `fn foo<'a>(x: &'a i32);` a function with two parameters gets two separate lifetime parameters: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);` and so on.
@@ -1688,7 +1688,7 @@ Run tests with `ignore` annotation:
 
 _Integration tests_ should be placed in a separate directory named `tests` in the root of your project. Each file in tests directory is a separate crate representing integration test. Functions which are common to all integration tests can be put in `tests/<some_dir>/mod.rs`. `tests/<some_dir>/mod.rs` will not be interpreted as integration test.
 
-In case of binary package it is not possible to perform integration tests agains it. It is common practice to make library package and pull almost everything inside library. Along with it, create a binary package with small amout of functionlality which uses the library.
+In case of binary package it is not possible to perform integration tests against it. It is common practice to make library package and pull almost everything inside library. Along with it, create a binary package with small amount of functionality which uses the library.
 
 
 ## Closures, iterators, and functional features
@@ -1710,7 +1710,7 @@ let add_one_v3 = |x|             { x + 1 };
 let add_one_v4 = |x|               x + 1  ;
 ```
 
-Closures are similar to functions, but data type specification is not mandatory becuase compiler can always infer data type.
+Closures are similar to functions, but data type specification is not mandatory because compiler can always infer data type.
 Data type can be inferred just once, at first use in code, e.g.:
 
 ``` rust
@@ -1791,7 +1791,7 @@ assert_eq!(v1_iter.next(), None);
 let v1_iter = v1.iter();
 
 // use iterator in for loop
-// for loop converts iterator to mutable imlicitly
+// for loop converts iterator to mutable implicitly
 for val in v1_iter {
     println!("Got: {}", val);
 }
@@ -1962,7 +1962,7 @@ Examples:
 // recursive data structure
 #[derive(Debug)]
 enum List {
-    Cons(i32, Box<List>),           // can't reference List directly without Box becuase size 
+    Cons(i32, Box<List>),           // can't reference List directly without Box because size 
                                     // of the structure is not known at compile time
     Nil,
 }
@@ -1995,7 +1995,7 @@ fn main() {
 ```
 
 `Deref` is also implemented for `Vec` and `String`.
-`Deref` can be implemented for cusom type, e.g.:
+`Deref` can be implemented for custom type, e.g.:
 
 ``` rust
 use std::ops::Deref;
@@ -2025,7 +2025,7 @@ fn main() {
 }
 ```
 
-_Deref coercion_ is automatic conversion from type implemeting `Deref` to reference type returned by `deref()` method of the trait.
+_Deref coercion_ is automatic conversion from type implementing `Deref` to reference type returned by `deref()` method of the trait.
 
 Example:
 
@@ -2040,14 +2040,14 @@ fn main() {
 }
 ```
 
-Similary to `Deref` the `DerefMut` trait can be used to override the `*` operator on mutable references.
+Similarly to `Deref` the `DerefMut` trait can be used to override the `*` operator on mutable references.
 Rust does deref coercion when it finds types and trait implementations in three cases:
 
  - From `&T` to `&U` when `T: Deref<Target=U>`
  - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
  - From `&mut T` to `&U` when `T: Deref<Target=U>`
 
-In the third case Rust will coerce a mutable reference to an immutable one. But the reverse is not possible becuase there can be several users of immutable reference and just one user of mutable.
+In the third case Rust will coerce a mutable reference to an immutable one. But the reverse is not possible because there can be several users of immutable reference and just one user of mutable.
 
 ### Drop trait
 
@@ -2259,7 +2259,7 @@ fn main() {
     thread::spawn(move || {
         let val = String::from("hi");
 
-        // sned the message
+        // send the message
         tx.send(val).unwrap();
 
         // val here can't be used anymore as it was moved
@@ -2325,7 +2325,7 @@ fn main() {
 Method `lock` returns a smart pointer called `MutexGuard`, wrapped in a `LockResult`. 
 `MutexGuard` implements `Deref` and `Drop`, and when it goes out of scope `drop()` is called and mutex is unlocked.
 
-Mutex can be shared between threads with help of `Arc<T>`. `Arc<T>` is similar to `Rc<T>`, but `Rc<T>` can't be used by mutiple threads, so atomic `Rc<T>` is required. `Arc<T>` is slower than `Rc<T>` because of costs of syncronization.
+Mutex can be shared between threads with help of `Arc<T>`. `Arc<T>` is similar to `Rc<T>`, but `Rc<T>` can't be used by multiple threads, so atomic `Rc<T>` is required. `Arc<T>` is slower than `Rc<T>` because of costs of synchronization.
 
 Example:
 
@@ -2372,15 +2372,15 @@ The `Sync` marker trait indicates that it is safe for the type implementing `Syn
 Manually implementing these traits involves implementing unsafe Rust code.
 
 
-## Obect-oriented features
+## Object-oriented features
 
-Incapsulation is provided by `pub` keyword on modules, structures, enumerations, structure fields, and functions.
+Encapsulation is provided by `pub` keyword on modules, structures, enumerations, structure fields, and functions.
 
-Compile time polymorphism is available with use of generic types. It is also called _bounded parametric polymorphism_. With bounds on generics the compiler generates nongeneric implementations of functions and methods for each concrete type that we use in place of a generic type parameter. This is called _static dispatch_.
+Compile time polymorphism is available with use of generic types. It is also called _bounded parametric polymorphism_. With bounds on generics the compiler generates non-generic implementations of functions and methods for each concrete type that we use in place of a generic type parameter. This is called _static dispatch_.
 
 Rust does not provide rich inheritance features. Traits are used to define common behaviour.
 
-### Dynamic polimorphism
+### Dynamic polymorphism
 
 Dynamic polymorphism (_dynamic dispatch_) can be achieved by using trait objects. With dynamic dispatch, at runtime, Rust uses the pointers inside the trait object to know which method to call. There is a runtime cost when this lookup happens that doesn’t occur with static dispatch. Dynamic dispatch also prevents the compiler from choosing to inline a method’s code, which in turn prevents some optimizations. 
 
@@ -2408,13 +2408,13 @@ struct MyStruct2 {}
 
 impl Test for MyStruct1 {
     fn run_test(&self) {
-        println!("Callled on MyStruct 1");
+        println!("Called on MyStruct 1");
     }
 }
 
 impl Test for MyStruct2 {
     fn run_test(&self) {
-        println!("Callled on MyStruct 2");
+        println!("Called on MyStruct 2");
     }
 }
 
@@ -2424,12 +2424,12 @@ fn main() {
 
     let mut trait_obj: &dyn Test = &obj1;
 
-    // prints "Callled on MyStruct 1"
+    // prints "Called on MyStruct 1"
     trait_obj.run_test();
 
     trait_obj = &obj2;
 
-    // prints "Callled on MyStruct 2"
+    // prints "Called on MyStruct 2"
     trait_obj.run_test();
 }
 ```
@@ -2448,7 +2448,7 @@ match <value> {
 ```
 
 ``` rust
-// matching to sevaral patterns
+// matching to several patterns
 if let <pattern> = <expression> {         // if let
 } else if let <pattern> = <expression> {  // else if let
 } else if <condition> {                   // without pattern
@@ -2479,7 +2479,7 @@ fn function_name(<pattern>: <datatype>) {
 }
 ```
 
-<pattern> consists of some combination of the following:
+\<pattern>\ consists of some combination of the following:
 
  - Literals
  - Destructured arrays, enums, structs, or tuples
@@ -2522,13 +2522,13 @@ match x {
 }
 ```
 
-Mutliple patterns:
+Multliple patterns:
 
 ``` rust
 let x = 1;
 
 match x {
-    1 | 2 => println!("one or two"),  // patteras are "or"ed with |
+    1 | 2 => println!("one or two"),  // patterns are "or"ed with |
     3 => println!("three"),
     _ => println!("anything"),
 }
@@ -2540,7 +2540,7 @@ Ranges of values:
 let x = 5;
 
 match x {
-    1..=5 => println!("one through five"),    // is equvalent to 1|2|3|4|5
+    1..=5 => println!("one through five"),    // is equivalent to 1|2|3|4|5
     _ => println!("something else"),
 }
 ```
@@ -2557,7 +2557,7 @@ match x {
 }
 ```
 
-Destructuring structs:
+De-structuring structs:
 
 ``` rust
 struct Point {
@@ -2588,7 +2588,7 @@ fn main() {
 }
 ```
 
-Destructuring Enums:
+De-structuring Enums:
 
 ``` rust
 enum Message {
@@ -2625,7 +2625,7 @@ fn main() {
 }
 ```
 
-Destructuring nested structs and enums:
+De-structuring nested structs and enums:
 
 ``` rust
 enum Color {
@@ -2665,7 +2665,7 @@ fn main() {
 }
 ```
 
-Destructuring structs and tuples:
+De-structuring structs and tuples:
 
 ``` rust
 let ((feet, inches), Point {x, y}) = ((3, 10), Point { x: 3, y: -10 });
@@ -2835,7 +2835,7 @@ unsafe {
 }
 ```
 
-Rust can call exteranl functions created in other languages. This feature is called _Foreign Function Interface_ (FFI). These kind of functions are always unsafe. `extern` keyword with type of _application binary interface_ (ABI) should be used in that case. For example for function compatible with `C` language we can write:
+Rust can call external functions created in other languages. This feature is called _Foreign Function Interface_ (FFI). These kind of functions are always unsafe. `extern` keyword with type of _application binary interface_ (ABI) should be used in that case. For example for function compatible with `C` language we can write:
 
 ``` rust
 extern "C" {
@@ -2936,7 +2936,7 @@ trait MyTrait {
     fn my_fun(self, param: u32);
 }
 
-// after some time we decided to exted it with generic type
+// after some time we decided to extend it with generic type
 // and to not break code that uses the trait default type is assigned
 // for the generic type
 trait MyTrait <T=u32> {
@@ -3208,7 +3208,7 @@ fn generic<T>(t: T) {
 }
 ```
 
-is eqivalent to
+is equivalent to
 
 ```rust
 fn generic<T: Sized>(t: T) {
