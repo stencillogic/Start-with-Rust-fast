@@ -50,6 +50,7 @@ This is a shorter version of the official [Rust tutorial](https://doc.rust-lang.
   * [Advanced types](#advanced-types)
   * [Advanced functions and closures](#advanced-functions-and-closures)
   * [Macros](#macros)
+- [Further reading](#further-reading)
 
 ## Installation, update, and uninstallation
 
@@ -3445,3 +3446,11 @@ The macro definition will look like:
 pub fn sql(input: TokenStream) -> TokenStream {
     ...
 ```
+
+## Further reading
+
+Information in this guide only is not enough for being confident. Contnue reading with:
+
+ - [Rust nomicon](https://doc.rust-lang.org/nomicon) is the next step in learning Rust.
+ - Pay attention to [appendices](https://doc.rust-lang.org/book/appendix-00.html) of the official guide. Those have not been included in this guide.
+ - [Here](https://github.com/instrumentisto/rust-incubator) you can find a whole bookshelf for Rust learners.
